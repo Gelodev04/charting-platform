@@ -1,0 +1,342 @@
+.kline-preview-root {
+  font-family: var(--font-geist-sans, Inter), system-ui, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  margin: 0;
+}
+
+.kline-preview-root--light {
+  --tb-bg: #ffffff;
+  --tb-border: #e9eaed;
+  --tb-text: #0f172a;
+  --tb-muted: #6b7280;
+  --tb-symbol-quote: #64748b;
+  --tb-symbol-caption: #94a3b8;
+  --tb-symbol-slash: #cbd5e1;
+  --tb-active: #2563eb;
+  --tb-active-soft: #e8f0fe;
+  --tb-hover: rgba(15, 23, 42, 0.05);
+  background: var(--tb-bg);
+  color: var(--tb-text);
+}
+
+.kline-preview-root--dark {
+  --tb-bg: #0f0f0f;
+  --tb-border: #2e2e2e;
+  --tb-text: #e8eaed;
+  --tb-muted: #9aa0a6;
+  --tb-symbol-quote: #8b9199;
+  --tb-symbol-caption: #6b7280;
+  --tb-symbol-slash: #4b5563;
+  --tb-active: #60a5fa;
+  --tb-active-soft: rgba(96, 165, 250, 0.12);
+  --tb-hover: rgba(255, 255, 255, 0.06);
+  background: var(--tb-bg);
+  color: var(--tb-text);
+}
+
+.kline-preview-root .announcement-bar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  height: 30px;
+  font-size: 12px;
+  background-color: rgba(22, 119, 255, 0.08);
+  color: #051441;
+  font-weight: bold;
+  border: solid 1px #ebedf1;
+  flex-shrink: 0;
+}
+
+.kline-preview-root .announcement-bar svg {
+  fill: #1677ff;
+  margin-right: 4px;
+}
+
+.kline-preview-root .announcement-bar a {
+  color: #1677ff;
+}
+.kline-preview-chart-host {
+  flex: 1 1 0;
+  min-height: 0;
+  width: 100%;
+  position: relative;
+}
+
+.kline-preview-chart-host--fill {
+  background: #fafafa;
+}
+
+.kline-preview-root--dark .kline-preview-chart-host--fill {
+  background: #0f0f0f;
+}
+
+.kline-preview-chart-grid {
+  flex: 1 1 0;
+  min-height: 0;
+  width: 100%;
+  display: grid;
+  gap: 1px;
+  background: var(--tb-border);
+  box-sizing: border-box;
+}
+
+.kline-preview-chart-grid--1 {
+  grid-template-columns: 1fr;
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.kline-preview-chart-grid--2 {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.kline-preview-chart-grid--4 {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.kline-preview-chart-cell {
+  min-width: 0;
+  min-height: 0;
+  position: relative;
+  background: #fafafa;
+}
+
+.kline-preview-root--dark .kline-preview-chart-cell {
+  background: #0f0f0f;
+}
+
+/* —— Minimal top toolbar —— */
+.chart-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  row-gap: 8px;
+  column-gap: 0;
+  min-height: 42px;
+  padding: 6px 14px;
+  border-bottom: 1px solid var(--tb-border);
+  background: var(--tb-bg);
+  flex-shrink: 0;
+}
+
+.chart-toolbar__group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.chart-toolbar__group--start {
+  gap: 10px;
+}
+
+.chart-toolbar__group--tf {
+  gap: 2px;
+  flex-wrap: wrap;
+  max-width: min(100%, 520px);
+}
+
+.chart-toolbar__group--layout {
+  gap: 2px;
+  flex-wrap: nowrap;
+}
+
+.chart-toolbar__tf--icon {
+  padding: 5px 8px;
+  min-width: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chart-toolbar__group--actions {
+  gap: 1px;
+}
+
+.chart-toolbar__group--end {
+  gap: 2px;
+  flex-wrap: wrap;
+}
+
+.chart-toolbar__divider {
+  width: 1px;
+  height: 20px;
+  margin: 0 12px;
+  background: var(--tb-border);
+  flex-shrink: 0;
+}
+
+.chart-toolbar__divider--compact {
+  height: 18px;
+  margin: 0 6px;
+}
+
+.chart-toolbar__spacer {
+  flex: 1;
+  min-width: 12px;
+}
+
+.chart-toolbar__symbol {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  max-width: min(320px, 42vw);
+  padding: 4px 10px;
+  margin: -4px 0;
+  border-radius: 10px;
+  transition: background 0.15s ease;
+}
+
+.chart-toolbar__symbol:hover {
+  background: var(--tb-hover);
+}
+
+.chart-toolbar__symbol-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+}
+
+.chart-toolbar__symbol-pair {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 3px;
+  line-height: 1.2;
+  font-size: 14px;
+}
+
+.chart-toolbar__symbol-base {
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  color: var(--tb-text);
+  font-feature-settings: "tnum" 1;
+}
+
+.chart-toolbar__symbol-slash {
+  font-weight: 400;
+  font-size: 13px;
+  color: var(--tb-symbol-slash);
+  user-select: none;
+}
+
+.chart-toolbar__symbol-quote {
+  font-weight: 500;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--tb-symbol-quote);
+  font-feature-settings: "tnum" 1;
+}
+
+.chart-toolbar__symbol-caption {
+  display: block;
+  max-width: 100%;
+  font-size: 10.5px;
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: 0.01em;
+  color: var(--tb-symbol-caption);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chart-toolbar__tf {
+  border: none;
+  background: transparent;
+  color: var(--tb-muted);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 5px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    color 0.12s ease,
+    background 0.12s ease;
+}
+
+.chart-toolbar__tf:hover {
+  color: var(--tb-text);
+  background: var(--tb-hover);
+}
+
+.chart-toolbar__tf--active {
+  color: var(--tb-active);
+  background: var(--tb-active-soft);
+  font-weight: 600;
+}
+
+.chart-toolbar__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: none;
+  background: transparent;
+  color: var(--tb-text);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.chart-toolbar__action:hover {
+  background: var(--tb-hover);
+}
+
+.chart-toolbar__action .chart-toolbar__icon-svg {
+  color: var(--tb-muted);
+}
+
+.chart-toolbar__action:hover .chart-toolbar__icon-svg {
+  color: var(--tb-text);
+}
+
+.chart-toolbar__action--icon-only {
+  padding: 6px 8px;
+  gap: 0;
+}
+
+.chart-toolbar__icon-svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* Hide built-in pro period bar; custom toolbar replaces it (handlers stay in DOM). */
+.kline-preview-root .klinecharts-pro-period-bar {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.kline-preview-root .klinecharts-pro {
+  width: 100%;
+  height: 100%;
+}
+
+.kline-preview-root .klinecharts-pro-content,
+.kline-preview-root .klinecharts-pro-widget {
+  min-height: 0;
+}
