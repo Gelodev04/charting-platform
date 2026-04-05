@@ -37,6 +37,8 @@ function klineRowToData(row: (string | number)[]): KLineData {
   };
 }
 
+const BINANCE_KLINES_URL = "https://api.binance.com/api/v3/klines";
+
 function normalizeSymbol(ticker: string): string {
   return ticker.replace(/[^A-Za-z0-9]/g, "").toUpperCase() || "BTCUSDT";
 }
@@ -89,9 +91,10 @@ export class BinanceDatafeed implements Datafeed {
       endTime: String(Math.floor(to)),
       limit: "1000",
     });
-    const res = await fetch(`/api/binance/klines?${params}`);
+    const res = await fetch(`${BINANCE_KLINES_URL}?${params}`);
     if (!res.ok) {
-      throw new Error(`Binance klines failed: ${res.status}`);
+      const detail = await res.text().catch(() => "");
+      throw new Error(`Binance klines failed: ${res.status} ${detail}`);
     }
     const raw = (await res.json()) as (string | number)[][];
     if (!Array.isArray(raw)) return [];
