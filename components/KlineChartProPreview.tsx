@@ -303,39 +303,41 @@ export function KlineChartProPreview() {
         chartLayout={chartLayout}
         onChartLayoutChange={onChartLayoutChange}
       />
-      <div className={`${gridClass} kline-preview-chart-host--fill`}>
-        {Array.from({ length: count }, (_, i) => (
-          <div
-            key={i}
-            ref={(el) => {
-              cellRefs.current[i] = el;
-              if (i === 0) primaryChartHostRef.current = el;
-            }}
-            className="kline-preview-chart-cell"
-          />
-        ))}
+      <div className="kline-preview-chart-wrapper">
+        <div className={`${gridClass} kline-preview-chart-host--fill`}>
+          {Array.from({ length: count }, (_, i) => (
+            <div
+              key={i}
+              ref={(el) => {
+                cellRefs.current[i] = el;
+                if (i === 0) primaryChartHostRef.current = el;
+              }}
+              className="kline-preview-chart-cell"
+            />
+          ))}
+        </div>
+        <div
+          className="kline-preview-range-bar"
+          role="group"
+          aria-label="Visible history range"
+        >
+          {CHART_HISTORY_RANGE_OPTIONS.map((id) => (
+            <button
+              key={id}
+              type="button"
+              className={
+                historyRange === id
+                  ? "kline-preview-range-bar__btn kline-preview-range-bar__btn--active"
+                  : "kline-preview-range-bar__btn"
+              }
+              aria-pressed={historyRange === id}
+              onClick={() => onHistoryRangeChange(id)}
+            >
+              {id}
+            </button>
+          ))}
+        </div>
       </div>
-      <footer
-        className="kline-preview-range-bar"
-        role="group"
-        aria-label="Visible history range"
-      >
-        {CHART_HISTORY_RANGE_OPTIONS.map((id) => (
-          <button
-            key={id}
-            type="button"
-            className={
-              historyRange === id
-                ? "kline-preview-range-bar__btn kline-preview-range-bar__btn--active"
-                : "kline-preview-range-bar__btn"
-            }
-            aria-pressed={historyRange === id}
-            onClick={() => onHistoryRangeChange(id)}
-          >
-            {id}
-          </button>
-        ))}
-      </footer>
     </div>
   );
 }
