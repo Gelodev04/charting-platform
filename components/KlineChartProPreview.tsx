@@ -69,6 +69,47 @@ function destroyPane(el: HTMLDivElement | null) {
   el.removeAttribute("data-theme");
 }
 
+function historyRangeBarSpace(id: ChartHistoryRangeId): number {
+  switch (id) {
+    case "1D":
+      return 11;
+    case "5D":
+      return 8;
+    case "1M":
+      return 6;
+    case "3M":
+      return 4;
+    case "6M":
+      return 3;
+    case "YTD":
+    case "1Y":
+      return 2;
+    case "5Y":
+    case "All":
+      return 1.2;
+  }
+}
+
+function applyHistoryRangeViewport(
+  charts: KLineChartPro[],
+  historyRangeId: ChartHistoryRangeId
+) {
+  const barSpace = historyRangeBarSpace(historyRangeId);
+  for (const chart of charts) {
+    const chartApi = (chart as unknown as { _chartApi?: unknown })._chartApi as
+      | {
+          setBarSpace?: (space: number) => void;
+          setOffsetRightDistance?: (distance: number) => void;
+          scrollToRealTime?: (animationDuration?: number) => void;
+        }
+      | undefined;
+    if (!chartApi) continue;
+    chartApi.setBarSpace?.(barSpace);
+    chartApi.setOffsetRightDistance?.(8);
+    chartApi.scrollToRealTime?.(0);
+  }
+}
+
 export function KlineChartProPreview() {
   const chartsRef = useRef<KLineChartPro[]>([]);
   const periodRef = useRef<Period>({ ...DEFAULT_KLINE_PERIOD });
@@ -162,6 +203,7 @@ export function KlineChartProPreview() {
 
       const previewStyles = getKlinePreviewChartStyles(colorSchemeRef.current);
       charts.forEach((c) => c.setStyles(previewStyles));
+      applyHistoryRangeViewport(charts, historyRangeRef.current);
 
       notifyChartResize();
       queueMicrotask(notifyChartResize);

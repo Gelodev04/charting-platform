@@ -167,8 +167,9 @@
   align-items: center;
   justify-content: flex-start;
   gap: 0;
-  margin-top: -14px;
-  padding: 1px 10px 4px calc(var(--kline-preview-drawing-bar-width) + 10px);
+  margin-top: -26px;
+  padding: 0 10px 2px calc(var(--kline-preview-drawing-bar-width) + 10px);
+  min-height: 22px;
   border-top: 1px solid var(--tb-border);
   background: var(--tb-bg);
   box-sizing: border-box;
