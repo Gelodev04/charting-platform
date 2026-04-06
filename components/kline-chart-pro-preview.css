@@ -158,6 +158,62 @@
   max-width: min(100%, 520px);
 }
 
+.chart-toolbar__tf-dropdown {
+  position: relative;
+}
+
+.chart-toolbar__tf-dropdown__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.chart-toolbar__tf-dropdown__chevron {
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+.chart-toolbar__tf-dropdown__menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  min-width: 72px;
+  padding: 4px;
+  border-radius: 8px;
+  background: var(--tb-bg);
+  border: 1px solid var(--tb-border);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+}
+
+.chart-toolbar__tf-dropdown__item {
+  border: none;
+  background: transparent;
+  color: var(--tb-muted);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    color 0.12s ease,
+    background 0.12s ease;
+}
+
+.chart-toolbar__tf-dropdown__item:hover {
+  color: var(--tb-text);
+  background: var(--tb-hover);
+}
+
+.chart-toolbar__tf-dropdown__item--active {
+  color: var(--tb-active);
+  background: var(--tb-active-soft);
+  font-weight: 600;
+}
+
 .kline-preview-chart-wrapper {
   flex: 1 1 0;
   min-height: 0;
