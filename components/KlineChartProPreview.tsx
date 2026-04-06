@@ -123,6 +123,7 @@ export function KlineChartProPreview() {
   const [historyRange, setHistoryRange] = useState<ChartHistoryRangeId>(() =>
     readStoredChartHistoryRange()
   );
+  const [utcTime, setUtcTime] = useState("");
   const colorSchemeRef = useRef<ChartColorScheme>(colorScheme);
   const historyRangeRef = useRef<ChartHistoryRangeId>(historyRange);
   const themeHydratedRef = useRef(false);
@@ -162,6 +163,16 @@ export function KlineChartProPreview() {
     const onHash = () => setLocale(resolveLocale());
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
+  }, []);
+
+  useEffect(() => {
+    const fmt = () => {
+      const d = new Date();
+      return `${String(d.getUTCHours()).padStart(2, "0")}:${String(d.getUTCMinutes()).padStart(2, "0")}:${String(d.getUTCSeconds()).padStart(2, "0")} UTC`;
+    };
+    setUtcTime(fmt());
+    const id = setInterval(() => setUtcTime(fmt()), 1000);
+    return () => clearInterval(id);
   }, []);
 
   useLayoutEffect(() => {
@@ -336,6 +347,7 @@ export function KlineChartProPreview() {
               {id}
             </button>
           ))}
+          <span className="kline-preview-range-bar__clock">{utcTime}</span>
         </div>
       </div>
     </div>

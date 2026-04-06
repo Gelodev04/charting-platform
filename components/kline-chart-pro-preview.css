@@ -226,6 +226,16 @@
   font-weight: 600;
 }
 
+.kline-preview-range-bar__clock {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--tb-active);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  padding-right: 4px;
+}
+
 .chart-toolbar__group--layout {
   gap: 2px;
   flex-wrap: nowrap;
