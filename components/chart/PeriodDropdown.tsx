@@ -1,9 +1,10 @@
 "use client";
 
 import type { Period } from "@klinecharts/pro";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import { ToolbarIconChevronDown } from "@/components/ui/icons";
+import { useOutsideClick } from "@/hooks/useOutsideClick";
 
 type PeriodDropdownProps = {
   periods: Period[];
@@ -21,21 +22,11 @@ export function PeriodDropdown({
 
   const close = useCallback(() => setOpen(false), []);
 
-  useEffect(() => {
-    if (!open) return;
-    const onClickOutside = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) close();
-    };
-    const onEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") close();
-    };
-    document.addEventListener("mousedown", onClickOutside);
-    document.addEventListener("keydown", onEsc);
-    return () => {
-      document.removeEventListener("mousedown", onClickOutside);
-      document.removeEventListener("keydown", onEsc);
-    };
-  }, [open, close]);
+  useOutsideClick(ref, {
+    enabled: open,
+    onOutsideClick: close,
+    onEscape: close,
+  });
 
   return (
     <div className="chart-toolbar__tf-dropdown" ref={ref}>

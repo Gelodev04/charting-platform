@@ -227,9 +227,7 @@
 }
 
 .kline-preview-root .klinecharts-pro-drawing-bar {
-  border-right-width: var(--tb-separator);
-  border-right-style: solid;
-  border-right-color: var(--klinecharts-pro-border-color);
+  border-right: none;
 }
 
 .kline-preview-root .klinecharts-pro-content,

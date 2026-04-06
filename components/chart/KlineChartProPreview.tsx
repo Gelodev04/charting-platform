@@ -34,6 +34,9 @@ import {
   DEFAULT_KLINE_PERIOD,
   getKlinePreviewChartStyles,
 } from "@/lib/chart/options";
+import { useChartTheme } from "@/hooks/chart/useChartTheme";
+import { useHashLocale } from "@/hooks/chart/useHashLocale";
+import { useUtcClock } from "@/hooks/chart/useUtcClock";
 
 import { ChartToolbar, type ChartColorScheme } from "./ChartToolbar";
 import "./KlineChartProPreview.css";
@@ -46,11 +49,6 @@ function resolveLocale(): Locale {
 }
 
 const THEME_STORAGE_KEY = "kline-preview-color-scheme";
-
-function formatUtcTime(): string {
-  const d = new Date();
-  return `${String(d.getUTCHours()).padStart(2, "0")}:${String(d.getUTCMinutes()).padStart(2, "0")}:${String(d.getUTCSeconds()).padStart(2, "0")} UTC`;
-}
 
 function readInitialColorScheme(): ChartColorScheme {
   if (typeof window === "undefined") return "light";
@@ -119,7 +117,7 @@ export function KlineChartProPreview() {
   const cellRefs = useRef<(HTMLDivElement | null)[]>([]);
   const primaryChartHostRef = useRef<HTMLDivElement | null>(null);
 
-  const [locale, setLocale] = useState<Locale>(() => resolveLocale());
+  const locale = useHashLocale(resolveLocale);
   const [period, setPeriod] = useState<Period>(() => ({ ...DEFAULT_KLINE_PERIOD }));
   const [colorScheme, setColorScheme] = useState<ChartColorScheme>(() =>
     readInitialColorScheme()
@@ -130,7 +128,7 @@ export function KlineChartProPreview() {
   const [historyRange, setHistoryRange] = useState<ChartHistoryRangeId>(() =>
     readStoredChartHistoryRange()
   );
-  const [utcTime, setUtcTime] = useState(() => formatUtcTime());
+  const utcTime = useUtcClock();
   const colorSchemeRef = useRef<ChartColorScheme>(colorScheme);
   const historyRangeRef = useRef<ChartHistoryRangeId>(historyRange);
 
@@ -140,29 +138,7 @@ export function KlineChartProPreview() {
     historyRangeRef.current = historyRange;
   }, [colorScheme, period, historyRange]);
 
-  useEffect(() => {
-    const root = document.documentElement;
-    root.classList.toggle("dark", colorScheme === "dark");
-    try {
-      localStorage.setItem(THEME_STORAGE_KEY, colorScheme);
-    } catch {
-      /* ignore */
-    }
-    return () => {
-      root.classList.remove("dark");
-    };
-  }, [colorScheme]);
-
-  useEffect(() => {
-    const onHash = () => setLocale(resolveLocale());
-    window.addEventListener("hashchange", onHash);
-    return () => window.removeEventListener("hashchange", onHash);
-  }, []);
-
-  useEffect(() => {
-    const id = setInterval(() => setUtcTime(formatUtcTime()), 1000);
-    return () => clearInterval(id);
-  }, []);
+  useChartTheme(colorScheme, THEME_STORAGE_KEY);
 
   useLayoutEffect(() => {
     let cancelled = false;
