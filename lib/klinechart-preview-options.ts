@@ -4,11 +4,12 @@ import { LineType, type DeepPartial, type Styles } from "klinecharts";
 import { BinanceDatafeed } from "@/lib/binance-datafeed";
 import { CHART_TOOLBAR_PERIODS } from "@/lib/chart-periods";
 
-/** Candle / wick / border (TradingView-style). */
 export const KLINE_PREVIEW_CANDLE_UP = "#089981";
 export const KLINE_PREVIEW_CANDLE_DOWN = "#f23645";
 
 const KLINE_PREVIEW_GRID_SIZE = 1;
+
+const KLINE_PREVIEW_LAST_PRICE_DASH = [2, 2] as const;
 
 export function getKlinePreviewChartStyles(theme: string): DeepPartial<Styles> {
   const gridColor =
@@ -35,6 +36,18 @@ export function getKlinePreviewChartStyles(theme: string): DeepPartial<Styles> {
         downBorderColor: KLINE_PREVIEW_CANDLE_DOWN,
         upWickColor: KLINE_PREVIEW_CANDLE_UP,
         downWickColor: KLINE_PREVIEW_CANDLE_DOWN,
+      },
+      priceMark: {
+        last: {
+          upColor: KLINE_PREVIEW_CANDLE_UP,
+          downColor: KLINE_PREVIEW_CANDLE_DOWN,
+          noChangeColor: "#787b86",
+          line: {
+            style: LineType.Dashed,
+            dashedValue: [...KLINE_PREVIEW_LAST_PRICE_DASH],
+            size: 1,
+          },
+        },
       },
     },
   };
