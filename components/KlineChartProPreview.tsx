@@ -1,5 +1,6 @@
 "use client";
 
+import "@/lib/register-klinecharts-dense-grid";
 import "@/lib/register-smooth-klinecharts-rect";
 import { KLineChartPro } from "@klinecharts/pro";
 import "@klinecharts/pro/dist/klinecharts-pro.css";
@@ -13,7 +14,6 @@ import {
 import {
   clickKlineProFullscreen,
   clickKlineProIndicator,
-  clickKlineProMenu,
   clickKlineProScreenshot,
   clickKlineProSettings,
   clickKlineProTimezone,
@@ -149,6 +149,9 @@ export function KlineChartProPreview() {
       }
       chartsRef.current = charts;
 
+      const previewStyles = getKlinePreviewChartStyles(colorSchemeRef.current);
+      charts.forEach((c) => c.setStyles(previewStyles));
+
       notifyChartResize();
       queueMicrotask(notifyChartResize);
       requestAnimationFrame(notifyChartResize);
@@ -211,10 +214,6 @@ export function KlineChartProPreview() {
         symbolHint={BTC_USDT_SYMBOL.name ?? ""}
         period={period}
         onPeriodChange={applyPeriod}
-        onMenuClick={() => {
-          const root = primaryRoot();
-          if (root) clickKlineProMenu(root);
-        }}
         onIndicatorsClick={() => {
           const root = primaryRoot();
           if (root) clickKlineProIndicator(root);

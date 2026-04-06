@@ -14,14 +14,6 @@ function dispatchUiClick(el: Element | null | undefined): void {
   );
 }
 
-/** Hamburger in period bar: toggles left drawing toolbar visibility. */
-export function clickKlineProMenu(root: HTMLElement): void {
-  const svg = root.querySelector(
-    ".klinecharts-pro-period-bar .menu-container svg"
-  );
-  dispatchUiClick(svg);
-}
-
 export function clickKlineProIndicator(root: HTMLElement): void {
   const bar = root.querySelector(".klinecharts-pro-period-bar");
   const firstTools = bar?.querySelector(".item.tools");

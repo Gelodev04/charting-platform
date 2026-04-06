@@ -11,7 +11,6 @@ import {
   ToolbarIconLayout1,
   ToolbarIconLayout2,
   ToolbarIconLayout4,
-  ToolbarIconMenu,
   ToolbarIconMoon,
   ToolbarIconSun,
 } from "@/components/chart-toolbar-icons";
@@ -29,8 +28,6 @@ type ChartToolbarProps = {
   symbolHint: string;
   period: Period;
   onPeriodChange: (p: Period) => void;
-  /** Same as Pro period-bar hamburger: toggles left drawing tools rail. */
-  onMenuClick: () => void;
   onIndicatorsClick: () => void;
   onTimezoneClick: () => void;
   onSettingsClick: () => void;
@@ -52,7 +49,6 @@ export function ChartToolbar({
   symbolHint,
   period,
   onPeriodChange,
-  onMenuClick,
   onIndicatorsClick,
   onTimezoneClick,
   onSettingsClick,
@@ -71,15 +67,6 @@ export function ChartToolbar({
   return (
     <header className="chart-toolbar">
       <div className="chart-toolbar__group chart-toolbar__group--start">
-        <button
-          type="button"
-          className="chart-toolbar__action chart-toolbar__action--icon-only"
-          title="Show or hide drawing tools"
-          aria-label="Toggle drawing tools sidebar"
-          onClick={onMenuClick}
-        >
-          <ToolbarIconMenu className="chart-toolbar__icon-svg" />
-        </button>
         <div
           className="chart-toolbar__symbol"
           title={symbolHint || label}

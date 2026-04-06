@@ -8,7 +8,7 @@ import { CHART_TOOLBAR_PERIODS } from "@/lib/chart-periods";
 export const KLINE_PREVIEW_CANDLE_UP = "#089981";
 export const KLINE_PREVIEW_CANDLE_DOWN = "#f23645";
 
-const KLINE_PREVIEW_GRID_SIZE = 2;
+const KLINE_PREVIEW_GRID_SIZE = 1;
 
 export function getKlinePreviewChartStyles(theme: string): DeepPartial<Styles> {
   const gridColor =

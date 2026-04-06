@@ -6,7 +6,6 @@ import {
   LayoutGrid,
   LineChart,
   Maximize2,
-  Menu,
   Moon,
   Settings,
   Square,
@@ -34,7 +33,6 @@ function wrap(
   return Wrapped;
 }
 
-export const ToolbarIconMenu = wrap(Menu, "ToolbarIconMenu");
 export const ToolbarIconIndicator = wrap(LineChart, "ToolbarIconIndicator");
 export const ToolbarIconGlobe = wrap(Globe, "ToolbarIconGlobe");
 export const ToolbarIconGear = wrap(Settings, "ToolbarIconGear");
