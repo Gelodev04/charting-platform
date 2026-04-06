@@ -1,12 +1,13 @@
 "use client";
 
 import type { Period } from "@klinecharts/pro";
-import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
   ToolbarIconAlert,
   ToolbarIconCamera,
   ToolbarIconChartType,
+  ToolbarIconChevronDown,
+  ToolbarIconProfile,
   ToolbarIconSearch,
   ToolbarIconExpand,
   ToolbarIconGear,
@@ -20,18 +21,18 @@ import {
   ToolbarIconReplay,
   ToolbarIconSun,
   ToolbarIconUndo,
-} from "@/components/chart-toolbar-icons";
-import type { ChartLayoutId } from "@/lib/chart-layout";
-import { CHART_TOOLBAR_PERIODS } from "@/lib/chart-periods";
+} from "@/components/ui/icons";
+import type { ChartLayoutId } from "@/lib/chart/layout";
+import { CHART_TOOLBAR_PERIODS } from "@/lib/chart/periods";
+
+import { PeriodDropdown } from "./PeriodDropdown";
+import "./ChartToolbar.css";
 
 export type ChartColorScheme = "light" | "dark";
 
 type ChartToolbarProps = {
-  /** Base asset label, e.g. BTC */
   symbolTicker: string;
-  /** Quote currency, e.g. USDT (shown after /) */
   symbolQuote?: string;
-  /** Full name; tooltip + optional caption under the pair */
   symbolHint: string;
   period: Period;
   onPeriodChange: (p: Period) => void;
@@ -48,89 +49,6 @@ type ChartToolbarProps = {
 
 function ToolbarDivider() {
   return <span className="chart-toolbar__divider" aria-hidden />;
-}
-
-function PeriodDropdown({
-  periods,
-  active,
-  onChange,
-}: {
-  periods: Period[];
-  active: Period;
-  onChange: (p: Period) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  const close = useCallback(() => setOpen(false), []);
-
-  useEffect(() => {
-    if (!open) return;
-    const onClickOutside = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) close();
-    };
-    const onEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") close();
-    };
-    document.addEventListener("mousedown", onClickOutside);
-    document.addEventListener("keydown", onEsc);
-    return () => {
-      document.removeEventListener("mousedown", onClickOutside);
-      document.removeEventListener("keydown", onEsc);
-    };
-  }, [open, close]);
-
-  return (
-    <div className="chart-toolbar__tf-dropdown" ref={ref}>
-      <button
-        type="button"
-        className="chart-toolbar__tf chart-toolbar__tf--active chart-toolbar__tf-dropdown__trigger"
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        aria-haspopup="listbox"
-      >
-        {active.text}
-        <svg
-          className="chart-toolbar__tf-dropdown__chevron"
-          width="10"
-          height="10"
-          viewBox="0 0 10 10"
-          aria-hidden
-        >
-          <path d="M2.5 4 5 6.5 7.5 4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </button>
-      {open && (
-        <div className="chart-toolbar__tf-dropdown__menu" role="listbox">
-          {periods.map((p) => {
-            const isActive =
-              p.text === active.text &&
-              p.multiplier === active.multiplier &&
-              p.timespan === active.timespan;
-            return (
-              <button
-                key={`${p.timespan}-${p.multiplier}-${p.text}`}
-                type="button"
-                role="option"
-                aria-selected={isActive}
-                className={
-                  isActive
-                    ? "chart-toolbar__tf-dropdown__item chart-toolbar__tf-dropdown__item--active"
-                    : "chart-toolbar__tf-dropdown__item"
-                }
-                onClick={() => {
-                  onChange(p);
-                  close();
-                }}
-              >
-                {p.text}
-              </button>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
 }
 
 export function ChartToolbar({
@@ -157,28 +75,31 @@ export function ChartToolbar({
   return (
     <header className="chart-toolbar">
       <div className="chart-toolbar__group chart-toolbar__group--start">
-        <div
-          className="chart-toolbar__symbol"
+        <button
+          type="button"
+          className="chart-toolbar__action chart-toolbar__action--icon-only"
+          title="Profile"
+          aria-label="Profile"
+          onClick={() => {}}
+        >
+          <ToolbarIconProfile className="chart-toolbar__icon-svg" />
+        </button>
+        <button
+          type="button"
+          className="chart-toolbar__symbol-btn"
           title={symbolHint || label}
           aria-label={label}
+          onClick={() => {}}
         >
-          <div className="chart-toolbar__symbol-body">
-            <div className="chart-toolbar__symbol-pair">
-              <span className="chart-toolbar__symbol-base">{symbolTicker}</span>
-              {symbolQuote != null && symbolQuote !== "" ? (
-                <>
-                  <span className="chart-toolbar__symbol-slash">/</span>
-                  <span className="chart-toolbar__symbol-quote">
-                    {symbolQuote}
-                  </span>
-                </>
-              ) : null}
-            </div>
-            {symbolHint ? (
-              <span className="chart-toolbar__symbol-caption">{symbolHint}</span>
-            ) : null}
-          </div>
-        </div>
+          <span className="chart-toolbar__symbol-label">
+            {symbolTicker}
+            {symbolQuote ?? ""}
+          </span>
+          <ToolbarIconChevronDown
+            className="chart-toolbar__symbol-chevron"
+            size={14}
+          />
+        </button>
       </div>
 
       <ToolbarDivider />
@@ -196,7 +117,7 @@ export function ChartToolbar({
         className="chart-toolbar__action chart-toolbar__action--icon-only"
         title="Chart type"
         aria-label="Chart type"
-        onClick={() => { }}
+        onClick={() => {}}
       >
         <ToolbarIconChartType className="chart-toolbar__icon-svg" />
       </button>
@@ -274,7 +195,7 @@ export function ChartToolbar({
         <button
           type="button"
           className="chart-toolbar__action"
-          onClick={() => { }}
+          onClick={() => {}}
         >
           <ToolbarIconAlert className="chart-toolbar__icon-svg" />
           <span>Alert</span>
@@ -282,7 +203,7 @@ export function ChartToolbar({
         <button
           type="button"
           className="chart-toolbar__action"
-          onClick={() => { }}
+          onClick={() => {}}
         >
           <ToolbarIconReplay className="chart-toolbar__icon-svg" />
           <span>Replay</span>
@@ -297,7 +218,7 @@ export function ChartToolbar({
           className="chart-toolbar__action chart-toolbar__action--icon-only"
           title="Undo"
           aria-label="Undo"
-          onClick={() => { }}
+          onClick={() => {}}
         >
           <ToolbarIconUndo className="chart-toolbar__icon-svg" />
         </button>
@@ -306,17 +227,20 @@ export function ChartToolbar({
           className="chart-toolbar__action chart-toolbar__action--icon-only"
           title="Redo"
           aria-label="Redo"
-          onClick={() => { }}
+          onClick={() => {}}
         >
           <ToolbarIconRedo className="chart-toolbar__icon-svg" />
         </button>
-        <span className="chart-toolbar__divider chart-toolbar__divider--compact" aria-hidden />
+        <span
+          className="chart-toolbar__divider chart-toolbar__divider--compact"
+          aria-hidden
+        />
         <button
           type="button"
           className="chart-toolbar__action chart-toolbar__action--icon-only"
           title="Search"
           aria-label="Search symbol"
-          onClick={() => { }}
+          onClick={() => {}}
         >
           <ToolbarIconSearch className="chart-toolbar__icon-svg" />
         </button>

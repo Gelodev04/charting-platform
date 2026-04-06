@@ -1,8 +1,8 @@
 import type { ChartProOptions, Datafeed, Period } from "@klinecharts/pro";
 import { LineType, type DeepPartial, type Styles } from "klinecharts";
 
-import { BinanceDatafeed } from "@/lib/binance-datafeed";
-import { CHART_TOOLBAR_PERIODS } from "@/lib/chart-periods";
+import { BinanceDatafeed } from "@/lib/datafeed/binance";
+import { CHART_TOOLBAR_PERIODS } from "@/lib/chart/periods";
 
 export const KLINE_PREVIEW_CANDLE_UP = "#089981";
 export const KLINE_PREVIEW_CANDLE_DOWN = "#f23645";

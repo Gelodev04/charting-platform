@@ -1,44 +1,42 @@
 "use client";
 
-import "@/lib/register-klinecharts-dense-grid";
-import "@/lib/register-smooth-klinecharts-rect";
+import "@/lib/klinecharts/register-dense-grid";
+import "@/lib/klinecharts/register-smooth-rect";
 import { KLineChartPro } from "@klinecharts/pro";
 import "@klinecharts/pro/dist/klinecharts-pro.css";
 import type { Period } from "@klinecharts/pro";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import {
-  ChartToolbar,
-  type ChartColorScheme,
-} from "@/components/ChartToolbar";
-import {
   clickKlineProFullscreen,
   clickKlineProIndicator,
   clickKlineProScreenshot,
   clickKlineProSettings,
   clickKlineProTimezone,
-} from "@/components/kline-pro-chart-actions";
-import { BinanceDatafeed } from "@/lib/binance-datafeed";
+} from "@/lib/chart/actions";
+import { BinanceDatafeed } from "@/lib/datafeed/binance";
 import {
   CHART_HISTORY_RANGE_OPTIONS,
   CHART_HISTORY_RANGE_STORAGE_KEY,
   type ChartHistoryRangeId,
   readStoredChartHistoryRange,
-} from "@/lib/chart-history-range";
+} from "@/lib/chart/history-range";
 import {
   CHART_LAYOUT_STORAGE_KEY,
   chartLayoutCellCount,
   type ChartLayoutId,
   readStoredChartLayout,
-} from "@/lib/chart-layout";
+} from "@/lib/chart/layout";
+import { injectDrawingBarTools } from "@/lib/chart/drawing-bar";
 import {
   BTC_USDT_SYMBOL,
   buildKlinePreviewOptions,
   DEFAULT_KLINE_PERIOD,
   getKlinePreviewChartStyles,
-} from "@/lib/klinechart-preview-options";
+} from "@/lib/chart/options";
 
-import "./kline-chart-pro-preview.css";
+import { ChartToolbar, type ChartColorScheme } from "./ChartToolbar";
+import "./KlineChartProPreview.css";
 
 type Locale = "zh-CN" | "en-US";
 
@@ -48,6 +46,11 @@ function resolveLocale(): Locale {
 }
 
 const THEME_STORAGE_KEY = "kline-preview-color-scheme";
+
+function formatUtcTime(): string {
+  const d = new Date();
+  return `${String(d.getUTCHours()).padStart(2, "0")}:${String(d.getUTCMinutes()).padStart(2, "0")}:${String(d.getUTCSeconds()).padStart(2, "0")} UTC`;
+}
 
 function readInitialColorScheme(): ChartColorScheme {
   if (typeof window === "undefined") return "light";
@@ -118,33 +121,24 @@ export function KlineChartProPreview() {
 
   const [locale, setLocale] = useState<Locale>(() => resolveLocale());
   const [period, setPeriod] = useState<Period>(() => ({ ...DEFAULT_KLINE_PERIOD }));
-  const [colorScheme, setColorScheme] = useState<ChartColorScheme>("light");
-  const [chartLayout, setChartLayout] = useState<ChartLayoutId>("1");
+  const [colorScheme, setColorScheme] = useState<ChartColorScheme>(() =>
+    readInitialColorScheme()
+  );
+  const [chartLayout, setChartLayout] = useState<ChartLayoutId>(() =>
+    readStoredChartLayout()
+  );
   const [historyRange, setHistoryRange] = useState<ChartHistoryRangeId>(() =>
     readStoredChartHistoryRange()
   );
-  const [utcTime, setUtcTime] = useState("");
+  const [utcTime, setUtcTime] = useState(() => formatUtcTime());
   const colorSchemeRef = useRef<ChartColorScheme>(colorScheme);
   const historyRangeRef = useRef<ChartHistoryRangeId>(historyRange);
-  const themeHydratedRef = useRef(false);
-  const layoutHydratedRef = useRef(false);
-  colorSchemeRef.current = colorScheme;
-  periodRef.current = period;
-  historyRangeRef.current = historyRange;
 
-  useLayoutEffect(() => {
-    if (themeHydratedRef.current) return;
-    themeHydratedRef.current = true;
-    const t = readInitialColorScheme();
-    colorSchemeRef.current = t;
-    setColorScheme(t);
-  }, []);
-
-  useLayoutEffect(() => {
-    if (layoutHydratedRef.current) return;
-    layoutHydratedRef.current = true;
-    setChartLayout(readStoredChartLayout());
-  }, []);
+  useEffect(() => {
+    colorSchemeRef.current = colorScheme;
+    periodRef.current = period;
+    historyRangeRef.current = historyRange;
+  }, [colorScheme, period, historyRange]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -166,12 +160,7 @@ export function KlineChartProPreview() {
   }, []);
 
   useEffect(() => {
-    const fmt = () => {
-      const d = new Date();
-      return `${String(d.getUTCHours()).padStart(2, "0")}:${String(d.getUTCMinutes()).padStart(2, "0")}:${String(d.getUTCSeconds()).padStart(2, "0")} UTC`;
-    };
-    setUtcTime(fmt());
-    const id = setInterval(() => setUtcTime(fmt()), 1000);
+    const id = setInterval(() => setUtcTime(formatUtcTime()), 1000);
     return () => clearInterval(id);
   }, []);
 
@@ -215,6 +204,11 @@ export function KlineChartProPreview() {
       const previewStyles = getKlinePreviewChartStyles(colorSchemeRef.current);
       charts.forEach((c) => c.setStyles(previewStyles));
       applyHistoryRangeViewport(charts, historyRangeRef.current);
+
+      const injectedCleanups: (() => void)[] = [];
+      for (const host of createdHosts) {
+        injectedCleanups.push(injectDrawingBarTools(host));
+      }
 
       notifyChartResize();
       queueMicrotask(notifyChartResize);
@@ -278,9 +272,7 @@ export function KlineChartProPreview() {
   const primaryRoot = () => primaryChartHostRef.current;
 
   return (
-    <div
-      className={`kline-preview-root kline-preview-root--${colorScheme}`}
-    >
+    <div className={`kline-preview-root kline-preview-root--${colorScheme}`}>
       <ChartToolbar
         symbolTicker={BTC_USDT_SYMBOL.shortName ?? "BTC"}
         symbolQuote={BTC_USDT_SYMBOL.priceCurrency?.toUpperCase() ?? "USDT"}

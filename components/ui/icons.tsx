@@ -3,6 +3,8 @@ import {
   Bell,
   Camera,
   CandlestickChart,
+  ChevronDown,
+  CircleUserRound,
   Columns2,
   Globe,
   LayoutGrid,
@@ -50,6 +52,8 @@ export const ToolbarIconLayout1 = wrap(Square, "ToolbarIconLayout1");
 export const ToolbarIconLayout2 = wrap(Columns2, "ToolbarIconLayout2");
 export const ToolbarIconLayout4 = wrap(LayoutGrid, "ToolbarIconLayout4");
 export const ToolbarIconSearch = wrap(Search, "ToolbarIconSearch");
+export const ToolbarIconProfile = wrap(CircleUserRound, "ToolbarIconProfile");
+export const ToolbarIconChevronDown = wrap(ChevronDown, "ToolbarIconChevronDown");
 export const ToolbarIconChartType = wrap(CandlestickChart, "ToolbarIconChartType");
 export const ToolbarIconAlert = wrap(Bell, "ToolbarIconAlert");
 export const ToolbarIconReplay = wrap(Play, "ToolbarIconReplay");

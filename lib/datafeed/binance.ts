@@ -4,7 +4,7 @@ import type { KLineData } from "klinecharts";
 import {
   effectiveHistoryFromMs,
   type ChartHistoryRangeId,
-} from "@/lib/chart-history-range";
+} from "@/lib/chart/history-range";
 
 function periodToBinanceInterval(period: Period): string {
   const m = period.multiplier;

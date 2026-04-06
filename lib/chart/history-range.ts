@@ -55,7 +55,7 @@ export function historyRangeToMode(id: ChartHistoryRangeId): HistorySpanMode {
 
 /**
  * Oldest timestamp to request. Pro passes `requestedFrom` (~500 bars); user range may be
- * shorter (1D → crop) or longer (3M → extend). Timestamps: older = smaller.
+ * shorter (1D -> crop) or longer (3M -> extend). Timestamps: older = smaller.
  */
 export function effectiveHistoryFromMs(
   to: number,

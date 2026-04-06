@@ -17,23 +17,23 @@ function dispatchUiClick(el: Element | null | undefined): void {
 export function clickKlineProIndicator(root: HTMLElement): void {
   const bar = root.querySelector(".klinecharts-pro-period-bar");
   const firstTools = bar?.querySelector(".item.tools");
-  (firstTools as HTMLElement | undefined)?.click();
+  dispatchUiClick(firstTools);
 }
 
 /** Order in period bar: 0 indicator, 1 timezone, 2 settings, 3 screenshot. */
 export function clickKlineProTimezone(root: HTMLElement): void {
   const tools = root.querySelectorAll(".klinecharts-pro-period-bar .item.tools");
-  (tools[1] as HTMLElement | undefined)?.click();
+  dispatchUiClick(tools[1]);
 }
 
 export function clickKlineProSettings(root: HTMLElement): void {
   const tools = root.querySelectorAll(".klinecharts-pro-period-bar .item.tools");
-  (tools[2] as HTMLElement | undefined)?.click();
+  dispatchUiClick(tools[2]);
 }
 
 export function clickKlineProScreenshot(root: HTMLElement): void {
   const tools = root.querySelectorAll(".klinecharts-pro-period-bar .item.tools");
-  (tools[3] as HTMLElement | undefined)?.click();
+  dispatchUiClick(tools[3]);
 }
 
 export function clickKlineProFullscreen(root: HTMLElement): void {
@@ -41,5 +41,5 @@ export function clickKlineProFullscreen(root: HTMLElement): void {
   const tools = bar?.querySelectorAll(".item.tools");
   const shot = tools?.[3];
   const next = shot?.nextElementSibling;
-  (next as HTMLElement | undefined)?.click();
+  dispatchUiClick(next);
 }
