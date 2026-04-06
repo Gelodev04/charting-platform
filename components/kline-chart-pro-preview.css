@@ -161,18 +161,28 @@
 .kline-preview-range-bar {
   flex-shrink: 0;
   position: relative;
-  z-index: 50;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: flex-start;
   gap: 0;
-  margin-top: -26px;
-  padding: 0 10px 2px calc(var(--kline-preview-drawing-bar-width) + 10px);
-  min-height: 22px;
+  margin-top: 0;
+  padding: 2px 10px 3px calc(var(--kline-preview-drawing-bar-width) + 10px);
+  min-height: 24px;
   border-top: 1px solid var(--tb-border);
   background: var(--tb-bg);
   box-sizing: border-box;
+}
+
+.kline-preview-range-bar::before {
+  content: "";
+  position: absolute;
+  left: var(--kline-preview-drawing-bar-width);
+  top: 0;
+  bottom: 0;
+  width: var(--tb-separator);
+  background: var(--klinecharts-pro-border-color);
+  pointer-events: none;
 }
 
 .kline-preview-range-bar__btn {
@@ -400,5 +410,6 @@
 }
 
 .kline-preview-root .klinecharts-pro-content {
+  height: 100%;
   gap: 0;
 }
