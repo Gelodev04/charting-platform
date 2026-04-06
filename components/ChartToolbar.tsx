@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ToolbarIconAlert,
   ToolbarIconCamera,
+  ToolbarIconChartType,
   ToolbarIconSearch,
   ToolbarIconExpand,
   ToolbarIconGear,
@@ -190,6 +191,18 @@ export function ChartToolbar({
 
       <ToolbarDivider />
 
+      <button
+        type="button"
+        className="chart-toolbar__action chart-toolbar__action--icon-only"
+        title="Chart type"
+        aria-label="Chart type"
+        onClick={() => { }}
+      >
+        <ToolbarIconChartType className="chart-toolbar__icon-svg" />
+      </button>
+
+      <ToolbarDivider />
+
       <div
         className="chart-toolbar__group chart-toolbar__group--layout"
         role="group"
@@ -261,7 +274,7 @@ export function ChartToolbar({
         <button
           type="button"
           className="chart-toolbar__action"
-          onClick={() => {}}
+          onClick={() => { }}
         >
           <ToolbarIconAlert className="chart-toolbar__icon-svg" />
           <span>Alert</span>
@@ -269,7 +282,7 @@ export function ChartToolbar({
         <button
           type="button"
           className="chart-toolbar__action"
-          onClick={() => {}}
+          onClick={() => { }}
         >
           <ToolbarIconReplay className="chart-toolbar__icon-svg" />
           <span>Replay</span>
@@ -284,7 +297,7 @@ export function ChartToolbar({
           className="chart-toolbar__action chart-toolbar__action--icon-only"
           title="Undo"
           aria-label="Undo"
-          onClick={() => {}}
+          onClick={() => { }}
         >
           <ToolbarIconUndo className="chart-toolbar__icon-svg" />
         </button>
@@ -293,7 +306,7 @@ export function ChartToolbar({
           className="chart-toolbar__action chart-toolbar__action--icon-only"
           title="Redo"
           aria-label="Redo"
-          onClick={() => {}}
+          onClick={() => { }}
         >
           <ToolbarIconRedo className="chart-toolbar__icon-svg" />
         </button>
@@ -303,7 +316,7 @@ export function ChartToolbar({
           className="chart-toolbar__action chart-toolbar__action--icon-only"
           title="Search"
           aria-label="Search symbol"
-          onClick={() => {}}
+          onClick={() => { }}
         >
           <ToolbarIconSearch className="chart-toolbar__icon-svg" />
         </button>

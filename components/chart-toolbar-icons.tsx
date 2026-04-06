@@ -2,6 +2,7 @@ import type { ComponentType, FC } from "react";
 import {
   Bell,
   Camera,
+  CandlestickChart,
   Columns2,
   Globe,
   LayoutGrid,
@@ -49,6 +50,7 @@ export const ToolbarIconLayout1 = wrap(Square, "ToolbarIconLayout1");
 export const ToolbarIconLayout2 = wrap(Columns2, "ToolbarIconLayout2");
 export const ToolbarIconLayout4 = wrap(LayoutGrid, "ToolbarIconLayout4");
 export const ToolbarIconSearch = wrap(Search, "ToolbarIconSearch");
+export const ToolbarIconChartType = wrap(CandlestickChart, "ToolbarIconChartType");
 export const ToolbarIconAlert = wrap(Bell, "ToolbarIconAlert");
 export const ToolbarIconReplay = wrap(Play, "ToolbarIconReplay");
 export const ToolbarIconUndo = wrap(Undo2, "ToolbarIconUndo");
