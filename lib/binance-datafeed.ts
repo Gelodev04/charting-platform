@@ -1,6 +1,11 @@
 import type { Datafeed, Period, SymbolInfo } from "@klinecharts/pro";
 import type { KLineData } from "klinecharts";
 
+import {
+  effectiveHistoryFromMs,
+  type ChartHistoryRangeId,
+} from "@/lib/chart-history-range";
+
 function periodToBinanceInterval(period: Period): string {
   const m = period.multiplier;
   switch (period.timespan) {
@@ -59,8 +64,52 @@ const BTC_USDT: SymbolInfo = {
   type: "crypto",
 };
 
+async function fetchKlinesPaged(
+  sym: string,
+  interval: string,
+  startMs: number,
+  endMs: number
+): Promise<KLineData[]> {
+  const byTs = new Map<number, KLineData>();
+  let before = endMs;
+
+  for (let page = 0; page < 60; page++) {
+    const params = new URLSearchParams({
+      symbol: sym,
+      interval,
+      endTime: String(Math.floor(before)),
+      limit: "1000",
+    });
+    const res = await fetch(`${BINANCE_KLINES_URL}?${params}`);
+    if (!res.ok) {
+      const detail = await res.text().catch(() => "");
+      throw new Error(`Binance klines failed: ${res.status} ${detail}`);
+    }
+    const raw = (await res.json()) as (string | number)[][];
+    if (!Array.isArray(raw) || raw.length === 0) break;
+
+    for (const row of raw) {
+      const d = klineRowToData(row);
+      if (d.timestamp >= startMs && d.timestamp <= endMs) {
+        byTs.set(d.timestamp, d);
+      }
+    }
+
+    const firstOpen = Number(raw[0][0]);
+    if (firstOpen <= startMs) break;
+    before = firstOpen - 1;
+    if (raw.length < 1000) break;
+  }
+
+  return Array.from(byTs.values()).sort((a, b) => a.timestamp - b.timestamp);
+}
+
 export class BinanceDatafeed implements Datafeed {
   private ws: WebSocket | null = null;
+
+  constructor(
+    private readonly getHistoryRange: () => ChartHistoryRangeId = () => "1D"
+  ) {}
 
   searchSymbols(search?: string): Promise<SymbolInfo[]> {
     if (!search?.trim()) return Promise.resolve([BTC_USDT]);
@@ -84,21 +133,16 @@ export class BinanceDatafeed implements Datafeed {
   ): Promise<KLineData[]> {
     const interval = periodToBinanceInterval(period);
     const sym = normalizeSymbol(symbol.ticker);
-    const params = new URLSearchParams({
-      symbol: sym,
-      interval,
-      startTime: String(Math.floor(from)),
-      endTime: String(Math.floor(to)),
-      limit: "1000",
-    });
-    const res = await fetch(`${BINANCE_KLINES_URL}?${params}`);
-    if (!res.ok) {
-      const detail = await res.text().catch(() => "");
-      throw new Error(`Binance klines failed: ${res.status} ${detail}`);
-    }
-    const raw = (await res.json()) as (string | number)[][];
-    if (!Array.isArray(raw)) return [];
-    return raw.map(klineRowToData);
+    const startMs = effectiveHistoryFromMs(
+      to,
+      from,
+      this.getHistoryRange()
+    );
+    const endMs = Math.floor(to);
+
+    if (endMs - startMs <= 0) return [];
+
+    return fetchKlinesPaged(sym, interval, startMs, endMs);
   }
 
   subscribe(

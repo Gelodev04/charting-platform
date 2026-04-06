@@ -20,6 +20,12 @@ import {
 } from "@/components/kline-pro-chart-actions";
 import { BinanceDatafeed } from "@/lib/binance-datafeed";
 import {
+  CHART_HISTORY_RANGE_OPTIONS,
+  CHART_HISTORY_RANGE_STORAGE_KEY,
+  type ChartHistoryRangeId,
+  readStoredChartHistoryRange,
+} from "@/lib/chart-history-range";
+import {
   CHART_LAYOUT_STORAGE_KEY,
   chartLayoutCellCount,
   type ChartLayoutId,
@@ -73,11 +79,16 @@ export function KlineChartProPreview() {
   const [period, setPeriod] = useState<Period>(() => ({ ...DEFAULT_KLINE_PERIOD }));
   const [colorScheme, setColorScheme] = useState<ChartColorScheme>("light");
   const [chartLayout, setChartLayout] = useState<ChartLayoutId>("1");
+  const [historyRange, setHistoryRange] = useState<ChartHistoryRangeId>(() =>
+    readStoredChartHistoryRange()
+  );
   const colorSchemeRef = useRef<ChartColorScheme>(colorScheme);
+  const historyRangeRef = useRef<ChartHistoryRangeId>(historyRange);
   const themeHydratedRef = useRef(false);
   const layoutHydratedRef = useRef(false);
   colorSchemeRef.current = colorScheme;
   periodRef.current = period;
+  historyRangeRef.current = historyRange;
 
   useLayoutEffect(() => {
     if (themeHydratedRef.current) return;
@@ -132,7 +143,7 @@ export function KlineChartProPreview() {
         const el = cellRefs.current[i];
         if (!el) continue;
         createdHosts.push(el);
-        const datafeed = new BinanceDatafeed();
+        const datafeed = new BinanceDatafeed(() => historyRangeRef.current);
         createdDatafeeds.push(datafeed);
         const chart = new KLineChartPro(
           buildKlinePreviewOptions(el, locale, datafeed, {
@@ -170,7 +181,7 @@ export function KlineChartProPreview() {
         destroyPane(host);
       }
     };
-  }, [locale, chartLayout]);
+  }, [locale, chartLayout, historyRange]);
 
   useEffect(() => {
     chartsRef.current.forEach((c) => {
@@ -189,6 +200,15 @@ export function KlineChartProPreview() {
     setChartLayout(id);
     try {
       localStorage.setItem(CHART_LAYOUT_STORAGE_KEY, id);
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  const onHistoryRangeChange = useCallback((id: ChartHistoryRangeId) => {
+    setHistoryRange(id);
+    try {
+      localStorage.setItem(CHART_HISTORY_RANGE_STORAGE_KEY, id);
     } catch {
       /* ignore */
     }
@@ -253,6 +273,27 @@ export function KlineChartProPreview() {
           />
         ))}
       </div>
+      <footer
+        className="kline-preview-range-bar"
+        role="group"
+        aria-label="Visible history range"
+      >
+        {CHART_HISTORY_RANGE_OPTIONS.map((id) => (
+          <button
+            key={id}
+            type="button"
+            className={
+              historyRange === id
+                ? "kline-preview-range-bar__btn kline-preview-range-bar__btn--active"
+                : "kline-preview-range-bar__btn"
+            }
+            aria-pressed={historyRange === id}
+            onClick={() => onHistoryRangeChange(id)}
+          >
+            {id}
+          </button>
+        ))}
+      </footer>
     </div>
   );
 }
