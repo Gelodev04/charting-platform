@@ -249,11 +249,13 @@ export function KlineChartProPreview() {
         createdHosts.push(el);
         const datafeed = new BinanceDatafeed(() => historyRangeRef.current);
         createdDatafeeds.push(datafeed);
+        const drawingBarVisible = count === 1 || i === 0;
         const chart = new KLineChartPro(
           buildKlinePreviewOptions(el, locale, datafeed, {
             period: periodRef.current,
             theme: colorSchemeRef.current,
             symbol: selectedSymbol,
+            drawingBarVisible,
           })
         );
         charts.push(chart);
@@ -273,8 +275,9 @@ export function KlineChartProPreview() {
       applyHistoryRangeViewport(charts, historyRangeRef.current);
 
       const injectedCleanups: (() => void)[] = [];
-      for (const host of createdHosts) {
-        injectedCleanups.push(injectDrawingBarTools(host));
+      const primaryHost = createdHosts[0];
+      if (primaryHost) {
+        injectedCleanups.push(injectDrawingBarTools(primaryHost));
       }
 
       notifyChartResize();

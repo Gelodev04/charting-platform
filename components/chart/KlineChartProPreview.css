@@ -19,8 +19,11 @@
   --kline-drawing-scrollbar-radius: 100px;
 }
 
+/* Collapse toolbar gutter only when the single chart hides its drawing bar.
+   In 2/4 layouts secondary panes use false so :has(any false) would wrongly zero width. */
 .kline-preview-root:has(
-  .klinecharts-pro-widget[data-drawing-bar-visible="false"]
+  .kline-preview-chart-grid--1
+    .klinecharts-pro-widget[data-drawing-bar-visible="false"]
 ) {
   --kline-preview-drawing-bar-width: 0px;
 }
