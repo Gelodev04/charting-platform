@@ -146,7 +146,45 @@
   min-width: 0;
   min-height: 0;
   position: relative;
+  overflow: hidden;
   background: #fafafa;
+}
+
+.kline-preview-chart-grid--4
+  .kline-preview-chart-cell:first-child
+  .klinecharts-pro-widget,
+.kline-preview-chart-grid--4
+  .kline-preview-chart-cell:nth-child(3)
+  .klinecharts-pro-widget {
+  margin-left: calc(
+    var(--kline-preview-drawing-bar-width) + var(--tb-separator)
+  );
+  width: calc(
+    100% - (var(--kline-preview-drawing-bar-width) + var(--tb-separator))
+  );
+}
+
+.kline-preview-chart-grid--4 .kline-preview-chart-cell:first-child {
+  overflow: visible;
+  z-index: 5;
+}
+
+.kline-preview-chart-grid--4
+  .kline-preview-chart-cell:first-child
+  .klinecharts-pro-content {
+  overflow: visible;
+}
+
+.kline-preview-chart-grid--4
+  .kline-preview-chart-cell:first-child
+  .klinecharts-pro-drawing-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: calc(200% + var(--tb-separator));
+  max-height: none;
+  overflow-y: hidden;
+  z-index: 6;
 }
 
 .kline-preview-root--dark .kline-preview-chart-cell {
