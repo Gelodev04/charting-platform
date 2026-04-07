@@ -65,6 +65,8 @@ export const BTC_USDT_SYMBOL: ChartProOptions["symbol"] = {
   type: "crypto",
 };
 
+export type KlinePreviewSymbol = ChartProOptions["symbol"];
+
 export const DEFAULT_KLINE_PERIOD = {
   multiplier: 15,
   timespan: "minute",
@@ -75,7 +77,12 @@ export function buildKlinePreviewOptions(
   container: HTMLElement,
   locale: string,
   datafeed: Datafeed = new BinanceDatafeed(),
-  overrides?: { period?: Period; theme?: string; drawingBarVisible?: boolean }
+  overrides?: {
+    period?: Period;
+    theme?: string;
+    drawingBarVisible?: boolean;
+    symbol?: KlinePreviewSymbol;
+  }
 ): ChartProOptions {
   const period = overrides?.period ?? { ...DEFAULT_KLINE_PERIOD };
   return {
@@ -84,7 +91,7 @@ export function buildKlinePreviewOptions(
     theme: overrides?.theme ?? "light",
     styles: getKlinePreviewChartStyles(overrides?.theme ?? "light"),
     watermark: "",
-    symbol: BTC_USDT_SYMBOL,
+    symbol: overrides?.symbol ?? BTC_USDT_SYMBOL,
     period,
     periods: [...CHART_TOOLBAR_PERIODS],
     drawingBarVisible: overrides?.drawingBarVisible ?? true,

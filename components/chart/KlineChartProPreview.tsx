@@ -31,6 +31,7 @@ import { injectDrawingBarTools } from "@/lib/chart/drawing-bar";
 import { applyPreviewCustomDateFormat } from "@/lib/chart/custom-date-format";
 import {
   BTC_USDT_SYMBOL,
+  type KlinePreviewSymbol,
   buildKlinePreviewOptions,
   DEFAULT_KLINE_PERIOD,
   getKlinePreviewChartStyles,
@@ -50,6 +51,36 @@ function resolveLocale(): Locale {
 }
 
 const THEME_STORAGE_KEY = "kline-preview-color-scheme";
+const SYMBOL_STORAGE_KEY = "kline-preview-symbol-ticker";
+const BINANCE_EXCHANGE_INFO_URL = "https://api.binance.com/api/v3/exchangeInfo";
+
+const KNOWN_QUOTES = ["USDT", "USDC", "BUSD", "BTC", "ETH", "BNB"] as const;
+
+function splitTicker(ticker: string): { base: string; quote: string } {
+  const upper = ticker.toUpperCase();
+  for (const quote of KNOWN_QUOTES) {
+    if (upper.endsWith(quote) && upper.length > quote.length) {
+      return { base: upper.slice(0, upper.length - quote.length), quote };
+    }
+  }
+  return { base: upper, quote: "" };
+}
+
+function buildSymbolInfo(ticker: string): KlinePreviewSymbol {
+  const safeTicker = ticker.replace(/[^A-Za-z0-9]/g, "").toUpperCase();
+  const { base, quote } = splitTicker(safeTicker);
+  return {
+    exchange: "BINANCE",
+    market: "crypto",
+    name: quote ? `${base} / ${quote}` : base,
+    shortName: base,
+    ticker: safeTicker,
+    priceCurrency: quote.toLowerCase(),
+    pricePrecision: 6,
+    volumePrecision: 5,
+    type: "crypto",
+  };
+}
 
 function readInitialColorScheme(): ChartColorScheme {
   if (typeof window === "undefined") return "light";
@@ -129,6 +160,11 @@ export function KlineChartProPreview() {
   const [historyRange, setHistoryRange] = useState<ChartHistoryRangeId>(() =>
     readStoredChartHistoryRange()
   );
+  const [selectedSymbol, setSelectedSymbol] =
+    useState<KlinePreviewSymbol>(BTC_USDT_SYMBOL);
+  const [symbolOptions, setSymbolOptions] = useState<
+    Array<{ ticker: string; label: string }>
+  >(() => [{ ticker: "BTCUSDT", label: "BTC / USDT" }]);
   const sessionClockLabel = useLocalClock();
   const colorSchemeRef = useRef<ChartColorScheme>(colorScheme);
   const historyRangeRef = useRef<ChartHistoryRangeId>(historyRange);
@@ -138,6 +174,56 @@ export function KlineChartProPreview() {
     periodRef.current = period;
     historyRangeRef.current = historyRange;
   }, [colorScheme, period, historyRange]);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(SYMBOL_STORAGE_KEY);
+      if (stored) setSelectedSymbol(buildSymbolInfo(stored));
+    } catch {
+      /* ignore */
+    }
+
+    let cancelled = false;
+    const loadSymbols = async () => {
+      try {
+        const res = await fetch(BINANCE_EXCHANGE_INFO_URL);
+        if (!res.ok) return;
+        const payload = (await res.json()) as {
+          symbols?: Array<{
+            symbol?: string;
+            status?: string;
+            quoteAsset?: string;
+            isSpotTradingAllowed?: boolean;
+          }>;
+        };
+        const symbols = (payload.symbols ?? [])
+          .filter((item) => {
+            if (!item.symbol || item.status !== "TRADING") return false;
+            if (!item.isSpotTradingAllowed) return false;
+            return item.quoteAsset === "USDT";
+          })
+          .map((item) => item.symbol as string)
+          .sort((a, b) => a.localeCompare(b))
+          .slice(0, 120);
+        if (!symbols.includes("BTCUSDT")) symbols.unshift("BTCUSDT");
+        const options = symbols.map((ticker) => {
+          const { base, quote } = splitTicker(ticker);
+          return {
+            ticker,
+            label: quote ? `${base} / ${quote}` : base,
+          };
+        });
+        if (!cancelled && options.length > 0) setSymbolOptions(options);
+      } catch {
+        /* ignore network failures and keep fallback list */
+      }
+    };
+
+    void loadSymbols();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useChartTheme(colorScheme, THEME_STORAGE_KEY);
 
@@ -167,6 +253,7 @@ export function KlineChartProPreview() {
           buildKlinePreviewOptions(el, locale, datafeed, {
             period: periodRef.current,
             theme: colorSchemeRef.current,
+            symbol: selectedSymbol,
           })
         );
         charts.push(chart);
@@ -201,14 +288,14 @@ export function KlineChartProPreview() {
       resizeObservers.forEach((ro) => ro.disconnect());
       const p = periodRef.current;
       for (const df of createdDatafeeds) {
-        df.unsubscribe(BTC_USDT_SYMBOL, { ...p });
+        df.unsubscribe(selectedSymbol, { ...p });
       }
       chartsRef.current = [];
       for (const host of createdHosts) {
         destroyPane(host);
       }
     };
-  }, [locale, chartLayout, historyRange]);
+  }, [locale, chartLayout, historyRange, selectedSymbol]);
 
   useEffect(() => {
     chartsRef.current.forEach((c) => {
@@ -244,6 +331,16 @@ export function KlineChartProPreview() {
     }
   }, []);
 
+  const onSymbolChange = useCallback((ticker: string) => {
+    const next = buildSymbolInfo(ticker);
+    setSelectedSymbol(next);
+    try {
+      localStorage.setItem(SYMBOL_STORAGE_KEY, next.ticker);
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
   const count = chartLayoutCellCount(chartLayout);
   const gridClass =
     chartLayout === "1"
@@ -257,9 +354,11 @@ export function KlineChartProPreview() {
   return (
     <div className={`kline-preview-root kline-preview-root--${colorScheme}`}>
       <ChartToolbar
-        symbolTicker={BTC_USDT_SYMBOL.shortName ?? "BTC"}
-        symbolQuote={BTC_USDT_SYMBOL.priceCurrency?.toUpperCase() ?? "USDT"}
-        symbolHint={BTC_USDT_SYMBOL.name ?? ""}
+        symbolTicker={selectedSymbol.shortName ?? "BTC"}
+        symbolQuote={selectedSymbol.priceCurrency?.toUpperCase() ?? "USDT"}
+        symbolHint={selectedSymbol.name ?? ""}
+        symbolOptions={symbolOptions}
+        onSymbolChange={onSymbolChange}
         period={period}
         onPeriodChange={applyPeriod}
         onIndicatorsClick={() => {

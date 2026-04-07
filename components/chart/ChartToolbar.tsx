@@ -1,6 +1,7 @@
 "use client";
 
 import type { Period } from "@klinecharts/pro";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   ToolbarIconAlert,
@@ -33,6 +34,8 @@ type ChartToolbarProps = {
   symbolTicker: string;
   symbolQuote?: string;
   symbolHint: string;
+  symbolOptions: Array<{ ticker: string; label: string }>;
+  onSymbolChange: (ticker: string) => void;
   period: Period;
   onPeriodChange: (p: Period) => void;
   onIndicatorsClick: () => void;
@@ -53,6 +56,8 @@ export function ChartToolbar({
   symbolTicker,
   symbolQuote,
   symbolHint,
+  symbolOptions,
+  onSymbolChange,
   period,
   onPeriodChange,
   onIndicatorsClick,
@@ -64,10 +69,33 @@ export function ChartToolbar({
   chartLayout,
   onChartLayoutChange,
 }: ChartToolbarProps) {
+  const [symbolModalOpen, setSymbolModalOpen] = useState(false);
+  const [symbolSearch, setSymbolSearch] = useState("");
+
   const label =
     symbolQuote != null && symbolQuote !== ""
       ? `${symbolTicker} / ${symbolQuote}`
       : symbolTicker;
+  const selectedTicker = `${symbolTicker}${(symbolQuote ?? "").toUpperCase()}`;
+
+  const filteredSymbolOptions = useMemo(() => {
+    const q = symbolSearch.trim().toUpperCase();
+    if (!q) return symbolOptions;
+    return symbolOptions.filter((option) => {
+      return (
+        option.ticker.includes(q) || option.label.toUpperCase().includes(q)
+      );
+    });
+  }, [symbolOptions, symbolSearch]);
+
+  useEffect(() => {
+    if (!symbolModalOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setSymbolModalOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [symbolModalOpen]);
 
   return (
     <header className="chart-toolbar">
@@ -86,7 +114,7 @@ export function ChartToolbar({
           className="chart-toolbar__symbol-btn"
           title={symbolHint || label}
           aria-label={label}
-          onClick={() => {}}
+          onClick={() => setSymbolModalOpen(true)}
         >
           <span className="chart-toolbar__symbol-label">
             {symbolTicker}
@@ -229,7 +257,7 @@ export function ChartToolbar({
           className="chart-toolbar__action chart-toolbar__action--icon-only"
           title="Search"
           aria-label="Search symbol"
-          onClick={() => {}}
+          onClick={() => setSymbolModalOpen(true)}
         >
           <ToolbarIconSearch className="chart-toolbar__icon-svg" />
         </button>
@@ -282,6 +310,60 @@ export function ChartToolbar({
           <ToolbarIconGear className="chart-toolbar__icon-svg" />
         </button>
       </div>
+      {symbolModalOpen ? (
+        <div
+          className="chart-toolbar__symbol-modal-backdrop"
+          onClick={() => setSymbolModalOpen(false)}
+        >
+          <div
+            className="chart-toolbar__symbol-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Symbol search"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="chart-toolbar__symbol-modal__header">
+              <span>Symbol search</span>
+              <button
+                type="button"
+                className="chart-toolbar__symbol-modal__close"
+                aria-label="Close symbol search"
+                onClick={() => setSymbolModalOpen(false)}
+              >
+                ×
+              </button>
+            </div>
+            <input
+              className="chart-toolbar__symbol-modal__search"
+              placeholder="Search pair (e.g. BTCUSDT)"
+              value={symbolSearch}
+              onChange={(event) => setSymbolSearch(event.target.value)}
+              autoFocus
+            />
+            <div className="chart-toolbar__symbol-modal__list">
+              {filteredSymbolOptions.map((option) => (
+                <button
+                  key={option.ticker}
+                  type="button"
+                  className={
+                    option.ticker === selectedTicker
+                      ? "chart-toolbar__symbol-modal__item chart-toolbar__symbol-modal__item--active"
+                      : "chart-toolbar__symbol-modal__item"
+                  }
+                  onClick={() => {
+                    onSymbolChange(option.ticker);
+                    setSymbolModalOpen(false);
+                    setSymbolSearch("");
+                  }}
+                >
+                  <span>{option.label}</span>
+                  <span>{option.ticker}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : null}
     </header>
   );
 }

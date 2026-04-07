@@ -150,6 +150,95 @@
   opacity: 0.5;
 }
 
+.chart-toolbar__symbol-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: grid;
+  place-items: center;
+  z-index: 1200;
+  padding: 16px;
+}
+
+.chart-toolbar__symbol-modal {
+  width: min(680px, 100%);
+  max-height: min(640px, calc(100vh - 32px));
+  display: flex;
+  flex-direction: column;
+  border-radius: 10px;
+  border: 1px solid var(--tb-border);
+  background: var(--tb-bg);
+  color: var(--tb-text);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+.chart-toolbar__symbol-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--tb-border);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.chart-toolbar__symbol-modal__close {
+  border: none;
+  background: transparent;
+  color: var(--tb-muted);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.chart-toolbar__symbol-modal__search {
+  margin: 12px 14px;
+  border: 1px solid var(--tb-border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--tb-text);
+  font-size: 14px;
+  padding: 9px 10px;
+}
+
+.chart-toolbar__symbol-modal__search:focus {
+  outline: 1px solid var(--tb-active);
+  outline-offset: 1px;
+}
+
+.chart-toolbar__symbol-modal__list {
+  overflow: auto;
+  padding: 0 8px 8px;
+}
+
+.chart-toolbar__symbol-modal__item {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: var(--tb-text);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.chart-toolbar__symbol-modal__item span:last-child {
+  color: var(--tb-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.chart-toolbar__symbol-modal__item:hover {
+  background: var(--tb-hover);
+}
+
+.chart-toolbar__symbol-modal__item--active {
+  background: var(--tb-active-soft);
+}
+
 .chart-toolbar__tf {
   border: none;
   background: transparent;
