@@ -53,8 +53,8 @@ export function injectDrawingBarTools(root: HTMLElement): () => void {
   const bar = root.querySelector<HTMLElement>(
     ".klinecharts-pro-drawing-bar"
   );
-  if (!bar) return () => {};
-  if (bar.querySelector(`[${INJECTED_ATTR}]`)) return () => {};
+  if (!bar) return () => { };
+  if (bar.querySelector(`[${INJECTED_ATTR}]`)) return () => { };
 
   const injected: HTMLElement[] = [];
   const firstBuiltInSplit = bar.querySelector(

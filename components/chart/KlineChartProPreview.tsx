@@ -28,6 +28,7 @@ import {
   readStoredChartLayout,
 } from "@/lib/chart/layout";
 import { injectDrawingBarTools } from "@/lib/chart/drawing-bar";
+import { applyPreviewCustomDateFormat } from "@/lib/chart/custom-date-format";
 import {
   BTC_USDT_SYMBOL,
   buildKlinePreviewOptions,
@@ -36,7 +37,7 @@ import {
 } from "@/lib/chart/options";
 import { useChartTheme } from "@/hooks/chart/useChartTheme";
 import { useHashLocale } from "@/hooks/chart/useHashLocale";
-import { useUtcClock } from "@/hooks/chart/useUtcClock";
+import { useLocalClock } from "@/hooks/chart/useLocalClock";
 
 import { ChartToolbar, type ChartColorScheme } from "./ChartToolbar";
 import "./KlineChartProPreview.css";
@@ -99,10 +100,10 @@ function applyHistoryRangeViewport(
   for (const chart of charts) {
     const chartApi = (chart as unknown as { _chartApi?: unknown })._chartApi as
       | {
-          setBarSpace?: (space: number) => void;
-          setOffsetRightDistance?: (distance: number) => void;
-          scrollToRealTime?: (animationDuration?: number) => void;
-        }
+        setBarSpace?: (space: number) => void;
+        setOffsetRightDistance?: (distance: number) => void;
+        scrollToRealTime?: (animationDuration?: number) => void;
+      }
       | undefined;
     if (!chartApi) continue;
     chartApi.setBarSpace?.(barSpace);
@@ -128,7 +129,7 @@ export function KlineChartProPreview() {
   const [historyRange, setHistoryRange] = useState<ChartHistoryRangeId>(() =>
     readStoredChartHistoryRange()
   );
-  const utcTime = useUtcClock();
+  const sessionClockLabel = useLocalClock();
   const colorSchemeRef = useRef<ChartColorScheme>(colorScheme);
   const historyRangeRef = useRef<ChartHistoryRangeId>(historyRange);
 
@@ -178,7 +179,10 @@ export function KlineChartProPreview() {
       chartsRef.current = charts;
 
       const previewStyles = getKlinePreviewChartStyles(colorSchemeRef.current);
-      charts.forEach((c) => c.setStyles(previewStyles));
+      charts.forEach((c) => {
+        c.setStyles(previewStyles);
+        applyPreviewCustomDateFormat(c, () => periodRef.current);
+      });
       applyHistoryRangeViewport(charts, historyRangeRef.current);
 
       const injectedCleanups: (() => void)[] = [];
@@ -216,7 +220,10 @@ export function KlineChartProPreview() {
   const applyPeriod = useCallback((p: Period) => {
     periodRef.current = p;
     setPeriod(p);
-    chartsRef.current.forEach((c) => c.setPeriod(p));
+    chartsRef.current.forEach((c) => {
+      c.setPeriod(p);
+      applyPreviewCustomDateFormat(c, () => periodRef.current);
+    });
   }, []);
 
   const onChartLayoutChange = useCallback((id: ChartLayoutId) => {
@@ -258,10 +265,6 @@ export function KlineChartProPreview() {
         onIndicatorsClick={() => {
           const root = primaryRoot();
           if (root) clickKlineProIndicator(root);
-        }}
-        onTimezoneClick={() => {
-          const root = primaryRoot();
-          if (root) clickKlineProTimezone(root);
         }}
         onSettingsClick={() => {
           const root = primaryRoot();
@@ -315,7 +318,18 @@ export function KlineChartProPreview() {
               {id}
             </button>
           ))}
-          <span className="kline-preview-range-bar__clock">{utcTime}</span>
+          <button
+            type="button"
+            className="kline-preview-range-bar__clock"
+            title="Local time — click to open timezone settings"
+            aria-label="Local session clock, opens timezone settings"
+            onClick={() => {
+              const root = primaryRoot();
+              if (root) clickKlineProTimezone(root);
+            }}
+          >
+            {sessionClockLabel}
+          </button>
         </div>
       </div>
     </div>

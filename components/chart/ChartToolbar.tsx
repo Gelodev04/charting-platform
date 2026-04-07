@@ -11,7 +11,6 @@ import {
   ToolbarIconSearch,
   ToolbarIconExpand,
   ToolbarIconGear,
-  ToolbarIconGlobe,
   ToolbarIconIndicator,
   ToolbarIconLayout1,
   ToolbarIconLayout2,
@@ -37,7 +36,6 @@ type ChartToolbarProps = {
   period: Period;
   onPeriodChange: (p: Period) => void;
   onIndicatorsClick: () => void;
-  onTimezoneClick: () => void;
   onSettingsClick: () => void;
   onScreenshotClick: () => void;
   onFullscreenClick: () => void;
@@ -58,7 +56,6 @@ export function ChartToolbar({
   period,
   onPeriodChange,
   onIndicatorsClick,
-  onTimezoneClick,
   onSettingsClick,
   onScreenshotClick,
   onFullscreenClick,
@@ -183,14 +180,6 @@ export function ChartToolbar({
         >
           <ToolbarIconIndicator className="chart-toolbar__icon-svg" />
           <span>Indicator</span>
-        </button>
-        <button
-          type="button"
-          className="chart-toolbar__action"
-          onClick={onTimezoneClick}
-        >
-          <ToolbarIconGlobe className="chart-toolbar__icon-svg" />
-          <span>Timezone</span>
         </button>
         <button
           type="button"
