@@ -1,17 +1,23 @@
 import type { ComponentType, FC } from "react";
 import {
   Bell,
+  CalendarDays,
   Camera,
   CandlestickChart,
   ChevronDown,
+  Copy,
+  Download,
   CircleUserRound,
   Columns2,
+  FolderOpen,
   Globe,
   LayoutGrid,
   LineChart,
   Maximize2,
   Moon,
+  PenLine,
   Play,
+  Plus,
   Redo2,
   Search,
   Settings,
@@ -59,3 +65,9 @@ export const ToolbarIconAlert = wrap(Bell, "ToolbarIconAlert");
 export const ToolbarIconReplay = wrap(Play, "ToolbarIconReplay");
 export const ToolbarIconUndo = wrap(Undo2, "ToolbarIconUndo");
 export const ToolbarIconRedo = wrap(Redo2, "ToolbarIconRedo");
+export const ToolbarIconCopy = wrap(Copy, "ToolbarIconCopy");
+export const ToolbarIconRename = wrap(PenLine, "ToolbarIconRename");
+export const ToolbarIconDownload = wrap(Download, "ToolbarIconDownload");
+export const ToolbarIconCreate = wrap(Plus, "ToolbarIconCreate");
+export const ToolbarIconOpenLayout = wrap(FolderOpen, "ToolbarIconOpenLayout");
+export const ToolbarIconCalendar = wrap(CalendarDays, "ToolbarIconCalendar");

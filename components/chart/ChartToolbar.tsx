@@ -8,7 +8,11 @@ import {
   ToolbarIconCamera,
   ToolbarIconChartType,
   ToolbarIconChevronDown,
-  ToolbarIconProfile,
+  ToolbarIconCopy,
+  ToolbarIconCreate,
+  ToolbarIconDownload,
+  ToolbarIconOpenLayout,
+  ToolbarIconRename,
   ToolbarIconSearch,
   ToolbarIconExpand,
   ToolbarIconGear,
@@ -22,6 +26,7 @@ import {
   ToolbarIconSun,
   ToolbarIconUndo,
 } from "@/components/ui/icons";
+import type { ChartCandleType } from "@/lib/chart/options";
 import type { ChartLayoutId } from "@/lib/chart/layout";
 import { CHART_TOOLBAR_PERIODS } from "@/lib/chart/periods";
 
@@ -38,6 +43,8 @@ type ChartToolbarProps = {
   onSymbolChange: (ticker: string) => void;
   period: Period;
   onPeriodChange: (p: Period) => void;
+  candleType: ChartCandleType;
+  onCandleTypeChange: (type: ChartCandleType) => void;
   onIndicatorsClick: () => void;
   onSettingsClick: () => void;
   onScreenshotClick: () => void;
@@ -60,6 +67,8 @@ export function ChartToolbar({
   onSymbolChange,
   period,
   onPeriodChange,
+  candleType,
+  onCandleTypeChange,
   onIndicatorsClick,
   onSettingsClick,
   onScreenshotClick,
@@ -71,6 +80,8 @@ export function ChartToolbar({
 }: ChartToolbarProps) {
   const [symbolModalOpen, setSymbolModalOpen] = useState(false);
   const [symbolSearch, setSymbolSearch] = useState("");
+  const [candleMenuOpen, setCandleMenuOpen] = useState(false);
+  const [layoutMenuOpen, setLayoutMenuOpen] = useState(false);
 
   const label =
     symbolQuote != null && symbolQuote !== ""
@@ -89,26 +100,36 @@ export function ChartToolbar({
   }, [symbolOptions, symbolSearch]);
 
   useEffect(() => {
-    if (!symbolModalOpen) return;
+    if (!symbolModalOpen && !candleMenuOpen && !layoutMenuOpen) return;
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setSymbolModalOpen(false);
+      if (event.key === "Escape") {
+        setSymbolModalOpen(false);
+        setCandleMenuOpen(false);
+        setLayoutMenuOpen(false);
+      }
+    };
+    const onClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (
+        target?.closest(".chart-toolbar__candle-dropdown") != null ||
+        target?.closest(".chart-toolbar__layout-dropdown") != null
+      ) {
+        return;
+      }
+      setCandleMenuOpen(false);
+      setLayoutMenuOpen(false);
     };
     window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [symbolModalOpen]);
+    window.addEventListener("mousedown", onClickOutside);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("mousedown", onClickOutside);
+    };
+  }, [symbolModalOpen, candleMenuOpen, layoutMenuOpen]);
 
   return (
     <header className="chart-toolbar">
       <div className="chart-toolbar__group chart-toolbar__group--start">
-        <button
-          type="button"
-          className="chart-toolbar__action chart-toolbar__action--icon-only"
-          title="Profile"
-          aria-label="Profile"
-          onClick={() => {}}
-        >
-          <ToolbarIconProfile className="chart-toolbar__icon-svg" />
-        </button>
         <button
           type="button"
           className="chart-toolbar__symbol-btn"
@@ -137,15 +158,102 @@ export function ChartToolbar({
 
       <ToolbarDivider />
 
-      <button
-        type="button"
-        className="chart-toolbar__action chart-toolbar__action--icon-only"
-        title="Chart type"
-        aria-label="Chart type"
-        onClick={() => {}}
-      >
-        <ToolbarIconChartType className="chart-toolbar__icon-svg" />
-      </button>
+      <div className="chart-toolbar__candle-dropdown">
+        <button
+          type="button"
+          className="chart-toolbar__action chart-toolbar__action--icon-only"
+          title="Chart type"
+          aria-label="Chart type"
+          aria-expanded={candleMenuOpen}
+          onClick={() => setCandleMenuOpen((open) => !open)}
+        >
+          <ToolbarIconChartType className="chart-toolbar__icon-svg" />
+        </button>
+        {candleMenuOpen ? (
+          <div className="chart-toolbar__candle-dropdown__menu" role="menu">
+            <button
+              type="button"
+              role="menuitemradio"
+              aria-checked={candleType === "candle_solid"}
+              className={
+                candleType === "candle_solid"
+                  ? "chart-toolbar__candle-dropdown__item chart-toolbar__candle-dropdown__item--active"
+                  : "chart-toolbar__candle-dropdown__item"
+              }
+              onClick={() => {
+                onCandleTypeChange("candle_solid");
+                setCandleMenuOpen(false);
+              }}
+            >
+              Candles
+            </button>
+            <button
+              type="button"
+              role="menuitemradio"
+              aria-checked={candleType === "candle_stroke"}
+              className={
+                candleType === "candle_stroke"
+                  ? "chart-toolbar__candle-dropdown__item chart-toolbar__candle-dropdown__item--active"
+                  : "chart-toolbar__candle-dropdown__item"
+              }
+              onClick={() => {
+                onCandleTypeChange("candle_stroke");
+                setCandleMenuOpen(false);
+              }}
+            >
+              Hollow candles
+            </button>
+            <button
+              type="button"
+              role="menuitemradio"
+              aria-checked={candleType === "candle_up_stroke"}
+              className={
+                candleType === "candle_up_stroke"
+                  ? "chart-toolbar__candle-dropdown__item chart-toolbar__candle-dropdown__item--active"
+                  : "chart-toolbar__candle-dropdown__item"
+              }
+              onClick={() => {
+                onCandleTypeChange("candle_up_stroke");
+                setCandleMenuOpen(false);
+              }}
+            >
+              Up hollow candles
+            </button>
+            <button
+              type="button"
+              role="menuitemradio"
+              aria-checked={candleType === "candle_down_stroke"}
+              className={
+                candleType === "candle_down_stroke"
+                  ? "chart-toolbar__candle-dropdown__item chart-toolbar__candle-dropdown__item--active"
+                  : "chart-toolbar__candle-dropdown__item"
+              }
+              onClick={() => {
+                onCandleTypeChange("candle_down_stroke");
+                setCandleMenuOpen(false);
+              }}
+            >
+              Down hollow candles
+            </button>
+            <button
+              type="button"
+              role="menuitemradio"
+              aria-checked={candleType === "ohlc"}
+              className={
+                candleType === "ohlc"
+                  ? "chart-toolbar__candle-dropdown__item chart-toolbar__candle-dropdown__item--active"
+                  : "chart-toolbar__candle-dropdown__item"
+              }
+              onClick={() => {
+                onCandleTypeChange("ohlc");
+                setCandleMenuOpen(false);
+              }}
+            >
+              OHLC
+            </button>
+          </div>
+        ) : null}
+      </div>
 
       <ToolbarDivider />
 
@@ -207,7 +315,7 @@ export function ChartToolbar({
           onClick={onIndicatorsClick}
         >
           <ToolbarIconIndicator className="chart-toolbar__icon-svg" />
-          <span>Indicator</span>
+          <span>Indicators</span>
         </button>
         <button
           type="button"
@@ -252,6 +360,81 @@ export function ChartToolbar({
           className="chart-toolbar__divider chart-toolbar__divider--compact"
           aria-hidden
         />
+        <div className="chart-toolbar__layout-dropdown">
+          <button
+            type="button"
+            className="chart-toolbar__layout-btn"
+            title="Chart layout menu"
+            aria-label="Chart layout menu"
+            aria-expanded={layoutMenuOpen}
+            onClick={() => setLayoutMenuOpen((open) => !open)}
+          >
+            <span>Unnamed</span>
+            <ToolbarIconChevronDown size={14} />
+          </button>
+          {layoutMenuOpen ? (
+            <div className="chart-toolbar__layout-menu" role="menu">
+              <button type="button" className="chart-toolbar__layout-menu__item">
+                <span>Save layout</span>
+                <span className="chart-toolbar__layout-menu__muted">Ctrl + S</span>
+              </button>
+              <div className="chart-toolbar__layout-menu__item chart-toolbar__layout-menu__item--toggle">
+                <span>Autosave</span>
+                <span className="chart-toolbar__layout-menu__switch" aria-hidden />
+              </div>
+              <div className="chart-toolbar__layout-menu__item chart-toolbar__layout-menu__item--toggle">
+                <span>
+                  Share layout{" "}
+                  <span className="chart-toolbar__layout-menu__info">i</span>
+                </span>
+                <span
+                  className="chart-toolbar__layout-menu__switch chart-toolbar__layout-menu__switch--off"
+                  aria-hidden
+                />
+              </div>
+              <button type="button" className="chart-toolbar__layout-menu__item">
+                <span className="chart-toolbar__layout-menu__left">
+                  <ToolbarIconCopy className="chart-toolbar__layout-menu__icon" />
+                  <span>Make a copy...</span>
+                </span>
+              </button>
+              <button type="button" className="chart-toolbar__layout-menu__item">
+                <span className="chart-toolbar__layout-menu__left">
+                  <ToolbarIconRename className="chart-toolbar__layout-menu__icon" />
+                  <span>Rename...</span>
+                </span>
+              </button>
+              <button type="button" className="chart-toolbar__layout-menu__item">
+                <span className="chart-toolbar__layout-menu__left">
+                  <ToolbarIconDownload className="chart-toolbar__layout-menu__icon" />
+                  <span>Download chart data...</span>
+                </span>
+              </button>
+              <div className="chart-toolbar__layout-menu__divider" />
+              <button type="button" className="chart-toolbar__layout-menu__item">
+                <span className="chart-toolbar__layout-menu__left">
+                  <ToolbarIconCreate className="chart-toolbar__layout-menu__icon" />
+                  <span>Create new layout...</span>
+                </span>
+              </button>
+              <div className="chart-toolbar__layout-menu__caption">RECENTLY USED</div>
+              <button
+                type="button"
+                className="chart-toolbar__layout-menu__item chart-toolbar__layout-menu__item--recent"
+              >
+                <span>Unnamed</span>
+                <span className="chart-toolbar__layout-menu__subtle">OGUSDT, 15</span>
+              </button>
+              <button type="button" className="chart-toolbar__layout-menu__item">
+                <span className="chart-toolbar__layout-menu__left">
+                  <ToolbarIconOpenLayout className="chart-toolbar__layout-menu__icon" />
+                  <span>Open layout...</span>
+                </span>
+                <span className="chart-toolbar__layout-menu__muted">Dot</span>
+              </button>
+            </div>
+          ) : null}
+        </div>
         <button
           type="button"
           className="chart-toolbar__action chart-toolbar__action--icon-only"

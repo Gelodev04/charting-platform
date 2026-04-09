@@ -31,6 +31,8 @@ import { injectDrawingBarTools } from "@/lib/chart/drawing-bar";
 import { applyPreviewCustomDateFormat } from "@/lib/chart/custom-date-format";
 import {
   BTC_USDT_SYMBOL,
+  DEFAULT_CHART_CANDLE_TYPE,
+  type ChartCandleType,
   type KlinePreviewSymbol,
   buildKlinePreviewOptions,
   DEFAULT_KLINE_PERIOD,
@@ -39,6 +41,7 @@ import {
 import { useChartTheme } from "@/hooks/chart/useChartTheme";
 import { useHashLocale } from "@/hooks/chart/useHashLocale";
 import { useLocalClock } from "@/hooks/chart/useLocalClock";
+import { ToolbarIconCalendar } from "@/components/ui/icons";
 
 import { ChartToolbar, type ChartColorScheme } from "./ChartToolbar";
 import "./KlineChartProPreview.css";
@@ -52,6 +55,7 @@ function resolveLocale(): Locale {
 
 const THEME_STORAGE_KEY = "kline-preview-color-scheme";
 const SYMBOL_STORAGE_KEY = "kline-preview-symbol-ticker";
+const CANDLE_TYPE_STORAGE_KEY = "kline-preview-candle-type";
 const BINANCE_EXCHANGE_INFO_URL = "https://api.binance.com/api/v3/exchangeInfo";
 
 const KNOWN_QUOTES = ["USDT", "USDC", "BUSD", "BTC", "ETH", "BNB"] as const;
@@ -82,6 +86,12 @@ function buildSymbolInfo(ticker: string): KlinePreviewSymbol {
   };
 }
 
+function symbolTooltipLabel(symbol: KlinePreviewSymbol): string {
+  const base = symbol.shortName ?? "";
+  const quote = symbol.priceCurrency?.toUpperCase() ?? "";
+  return quote ? `${base} / ${quote}` : (symbol.name ?? base);
+}
+
 function readInitialColorScheme(): ChartColorScheme {
   if (typeof window === "undefined") return "light";
   try {
@@ -93,6 +103,25 @@ function readInitialColorScheme(): ChartColorScheme {
   return window.matchMedia("(prefers-color-scheme: dark)").matches
     ? "dark"
     : "light";
+}
+
+function readInitialCandleType(): ChartCandleType {
+  if (typeof window === "undefined") return DEFAULT_CHART_CANDLE_TYPE;
+  try {
+    const stored = localStorage.getItem(CANDLE_TYPE_STORAGE_KEY);
+    if (
+      stored === "candle_solid" ||
+      stored === "candle_stroke" ||
+      stored === "candle_up_stroke" ||
+      stored === "candle_down_stroke" ||
+      stored === "ohlc"
+    ) {
+      return stored;
+    }
+  } catch {
+    /* ignore */
+  }
+  return DEFAULT_CHART_CANDLE_TYPE;
 }
 
 function destroyPane(el: HTMLDivElement | null) {
@@ -162,6 +191,9 @@ export function KlineChartProPreview() {
   );
   const [selectedSymbol, setSelectedSymbol] =
     useState<KlinePreviewSymbol>(BTC_USDT_SYMBOL);
+  const [candleType, setCandleType] = useState<ChartCandleType>(() =>
+    readInitialCandleType()
+  );
   const [symbolOptions, setSymbolOptions] = useState<
     Array<{ ticker: string; label: string }>
   >(() => [{ ticker: "BTCUSDT", label: "BTC / USDT" }]);
@@ -255,6 +287,7 @@ export function KlineChartProPreview() {
             period: periodRef.current,
             theme: colorSchemeRef.current,
             symbol: selectedSymbol,
+            symbolLabel: symbolTooltipLabel(selectedSymbol),
             drawingBarVisible,
           })
         );
@@ -267,7 +300,11 @@ export function KlineChartProPreview() {
       }
       chartsRef.current = charts;
 
-      const previewStyles = getKlinePreviewChartStyles(colorSchemeRef.current);
+      const previewStyles = getKlinePreviewChartStyles(
+        colorSchemeRef.current,
+        candleType,
+        symbolTooltipLabel(selectedSymbol)
+      );
       charts.forEach((c) => {
         c.setStyles(previewStyles);
         applyPreviewCustomDateFormat(c, () => periodRef.current);
@@ -298,14 +335,20 @@ export function KlineChartProPreview() {
         destroyPane(host);
       }
     };
-  }, [locale, chartLayout, historyRange, selectedSymbol]);
+  }, [locale, chartLayout, historyRange, selectedSymbol, candleType]);
 
   useEffect(() => {
     chartsRef.current.forEach((c) => {
       c.setTheme(colorScheme);
-      c.setStyles(getKlinePreviewChartStyles(colorScheme));
+      c.setStyles(
+        getKlinePreviewChartStyles(
+          colorScheme,
+          candleType,
+          symbolTooltipLabel(selectedSymbol)
+        )
+      );
     });
-  }, [colorScheme]);
+  }, [colorScheme, candleType, selectedSymbol]);
 
   const applyPeriod = useCallback((p: Period) => {
     periodRef.current = p;
@@ -364,6 +407,15 @@ export function KlineChartProPreview() {
         onSymbolChange={onSymbolChange}
         period={period}
         onPeriodChange={applyPeriod}
+        candleType={candleType}
+        onCandleTypeChange={(type) => {
+          setCandleType(type);
+          try {
+            localStorage.setItem(CANDLE_TYPE_STORAGE_KEY, type);
+          } catch {
+            /* ignore */
+          }
+        }}
         onIndicatorsClick={() => {
           const root = primaryRoot();
           if (root) clickKlineProIndicator(root);
@@ -420,6 +472,16 @@ export function KlineChartProPreview() {
               {id}
             </button>
           ))}
+          <span className="kline-preview-range-bar__divider" aria-hidden />
+          <button
+            type="button"
+            className="kline-preview-range-bar__goto"
+            title="Go to date"
+            aria-label="Go to date"
+            onClick={() => {}}
+          >
+            <ToolbarIconCalendar />
+          </button>
           <button
             type="button"
             className="kline-preview-range-bar__clock"

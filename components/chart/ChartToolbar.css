@@ -22,6 +22,158 @@
   gap: 10px;
 }
 
+.chart-toolbar__layout-dropdown {
+  position: relative;
+}
+
+.chart-toolbar__layout-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--tb-border);
+  background: transparent;
+  color: var(--tb-text);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  padding: 5px 9px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.chart-toolbar__layout-btn:hover {
+  background: var(--tb-hover);
+}
+
+.chart-toolbar__layout-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 80;
+  width: 248px;
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid var(--tb-border);
+  background: var(--tb-bg);
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.36);
+}
+
+.chart-toolbar__layout-menu__item {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: var(--tb-text);
+  font-size: 14px;
+  font-weight: 500;
+  min-height: 33px;
+  border-radius: 6px;
+  padding: 6px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+  cursor: pointer;
+}
+
+.chart-toolbar__layout-menu__item:hover {
+  background: var(--tb-hover);
+}
+
+.chart-toolbar__layout-menu__left {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chart-toolbar__layout-menu__icon {
+  width: 15px;
+  height: 15px;
+  color: var(--tb-muted);
+  flex-shrink: 0;
+}
+
+.chart-toolbar__layout-menu__item:hover .chart-toolbar__layout-menu__icon {
+  color: var(--tb-text);
+}
+
+.chart-toolbar__layout-menu__item--toggle {
+  cursor: default;
+}
+
+.chart-toolbar__layout-menu__item--recent {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  background: var(--tb-hover);
+}
+
+.chart-toolbar__layout-menu__muted {
+  color: var(--tb-muted);
+  font-size: 12px;
+}
+
+.chart-toolbar__layout-menu__subtle {
+  color: var(--tb-muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.chart-toolbar__layout-menu__caption {
+  color: var(--tb-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  padding: 8px 8px 4px;
+}
+
+.chart-toolbar__layout-menu__divider {
+  height: 1px;
+  background: var(--tb-border);
+  margin: 6px 0;
+}
+
+.chart-toolbar__layout-menu__switch {
+  position: relative;
+  width: 30px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--tb-active);
+}
+
+.chart-toolbar__layout-menu__switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 14px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.chart-toolbar__layout-menu__switch--off {
+  background: color-mix(in srgb, var(--tb-muted) 32%, transparent);
+}
+
+.chart-toolbar__layout-menu__switch--off::after {
+  left: 2px;
+}
+
+.chart-toolbar__layout-menu__info {
+  display: inline-grid;
+  place-items: center;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--tb-muted) 70%, transparent);
+  color: var(--tb-muted);
+  font-size: 10px;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
 .chart-toolbar__group--tf {
   gap: 2px;
   flex-wrap: wrap;
@@ -79,6 +231,51 @@
 }
 
 .chart-toolbar__tf-dropdown__item--active {
+  color: var(--tb-active);
+  background: var(--tb-active-soft);
+  font-weight: 600;
+}
+
+.chart-toolbar__candle-dropdown {
+  position: relative;
+}
+
+.chart-toolbar__candle-dropdown__menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  min-width: 170px;
+  padding: 4px;
+  border-radius: 8px;
+  background: var(--tb-bg);
+  border: 1px solid var(--tb-border);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+}
+
+.chart-toolbar__candle-dropdown__item {
+  border: none;
+  background: transparent;
+  color: var(--tb-muted);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    color 0.12s ease,
+    background 0.12s ease;
+}
+
+.chart-toolbar__candle-dropdown__item:hover {
+  color: var(--tb-text);
+  background: var(--tb-hover);
+}
+
+.chart-toolbar__candle-dropdown__item--active {
   color: var(--tb-active);
   background: var(--tb-active-soft);
   font-weight: 600;
