@@ -28,6 +28,12 @@ export function PeriodDropdown({
     onEscape: close,
   });
 
+  const activeLabel =
+    periods.find(
+      (p) =>
+        p.multiplier === active.multiplier && p.timespan === active.timespan
+    )?.text ?? active.text;
+
   return (
     <div className="chart-toolbar__tf-dropdown" ref={ref}>
       <button
@@ -37,7 +43,7 @@ export function PeriodDropdown({
         aria-expanded={open}
         aria-haspopup="listbox"
       >
-        {active.text}
+        {activeLabel}
         <ToolbarIconChevronDown
           className="chart-toolbar__tf-dropdown__chevron"
           size={12}
@@ -62,7 +68,7 @@ export function PeriodDropdown({
                     : "chart-toolbar__tf-dropdown__item"
                 }
                 onClick={() => {
-                  onChange(p);
+                  onChange({ ...p });
                   close();
                 }}
               >

@@ -1,7 +1,8 @@
 "use client";
 
-import "@/lib/klinecharts/register-dense-grid";
 import "@/lib/klinecharts/register-smooth-rect";
+import "@/lib/klinecharts/register-adaptive-xaxis";
+import "@/lib/klinecharts/register-dense-yaxis";
 import { KLineChartPro } from "@klinecharts/pro";
 import "@klinecharts/pro/dist/klinecharts-pro.css";
 import type { Period } from "@klinecharts/pro";
@@ -152,21 +153,47 @@ function historyRangeBarSpace(id: ChartHistoryRangeId): number {
   }
 }
 
+/** Wider bars (higher space) ≈ more zoomed in; scales with timeframe like TradingView. */
+function periodBarSpaceFactor(period: Period): number {
+  if (period.timespan === "minute") {
+    if (period.multiplier <= 1) return 1.45;
+    if (period.multiplier <= 3) return 1.18;
+    if (period.multiplier <= 5) return 1.1;
+    if (period.multiplier >= 30) return 0.78;
+    if (period.multiplier >= 15) return 0.9;
+  }
+  if (period.timespan === "hour") {
+    if (period.multiplier >= 8) return 0.88;
+    return 0.95;
+  }
+  return 1;
+}
+
+function clampChartBarSpace(n: number): number {
+  return Math.min(50, Math.max(1, n));
+}
+
 function applyHistoryRangeViewport(
   charts: KLineChartPro[],
-  historyRangeId: ChartHistoryRangeId
+  historyRangeId: ChartHistoryRangeId,
+  period: Period
 ) {
-  const barSpace = historyRangeBarSpace(historyRangeId);
+  const base = historyRangeBarSpace(historyRangeId);
+  const barSpace = clampChartBarSpace(base * periodBarSpaceFactor(period));
   for (const chart of charts) {
     const chartApi = (chart as unknown as { _chartApi?: unknown })._chartApi as
       | {
         setBarSpace?: (space: number) => void;
         setOffsetRightDistance?: (distance: number) => void;
+        setLeftMinVisibleBarCount?: (barCount: number) => void;
+        setRightMinVisibleBarCount?: (barCount: number) => void;
         scrollToRealTime?: (animationDuration?: number) => void;
       }
       | undefined;
     if (!chartApi) continue;
     chartApi.setBarSpace?.(barSpace);
+    chartApi.setLeftMinVisibleBarCount?.(1);
+    chartApi.setRightMinVisibleBarCount?.(1);
     chartApi.setOffsetRightDistance?.(8);
     chartApi.scrollToRealTime?.(0);
   }
@@ -309,7 +336,11 @@ export function KlineChartProPreview() {
         c.setStyles(previewStyles);
         applyPreviewCustomDateFormat(c, () => periodRef.current);
       });
-      applyHistoryRangeViewport(charts, historyRangeRef.current);
+      applyHistoryRangeViewport(
+        charts,
+        historyRangeRef.current,
+        periodRef.current
+      );
 
       const injectedCleanups: (() => void)[] = [];
       const primaryHost = createdHosts[0];
@@ -351,12 +382,18 @@ export function KlineChartProPreview() {
   }, [colorScheme, candleType, selectedSymbol]);
 
   const applyPeriod = useCallback((p: Period) => {
-    periodRef.current = p;
-    setPeriod(p);
+    const nextPeriod = { ...p };
+    periodRef.current = nextPeriod;
+    setPeriod(nextPeriod);
     chartsRef.current.forEach((c) => {
-      c.setPeriod(p);
+      c.setPeriod({ ...nextPeriod });
       applyPreviewCustomDateFormat(c, () => periodRef.current);
     });
+    applyHistoryRangeViewport(
+      chartsRef.current,
+      historyRangeRef.current,
+      nextPeriod
+    );
   }, []);
 
   const onChartLayoutChange = useCallback((id: ChartLayoutId) => {
@@ -478,7 +515,7 @@ export function KlineChartProPreview() {
             className="kline-preview-range-bar__goto"
             title="Go to date"
             aria-label="Go to date"
-            onClick={() => {}}
+            onClick={() => { }}
           >
             <ToolbarIconCalendar />
           </button>

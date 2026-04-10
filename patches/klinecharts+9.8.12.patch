@@ -1,0 +1,13 @@
+diff --git a/node_modules/klinecharts/dist/index.esm.js b/node_modules/klinecharts/dist/index.esm.js
+index 86b1dce..fd13385 100644
+--- a/node_modules/klinecharts/dist/index.esm.js
++++ b/node_modules/klinecharts/dist/index.esm.js
+@@ -1928,7 +1928,7 @@ function getDefaultVisibleRange() {
+  * limitations under the License.
+  */
+ var BarSpaceLimitConstants = {
+-    MIN: 1,
++    MIN: 0.8,
+     MAX: 50
+ };
+ var DEFAULT_BAR_SPACE = 8;
