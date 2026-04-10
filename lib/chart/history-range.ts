@@ -27,6 +27,8 @@ const DAY_MS = 86400000;
 
 export type HistorySpanMode =
   | { kind: "ms"; ms: number }
+  | { kind: "utcMonths"; months: number }
+  | { kind: "utcYears"; years: number }
   | { kind: "ytd" }
   | { kind: "all" };
 
@@ -37,17 +39,17 @@ export function historyRangeToMode(id: ChartHistoryRangeId): HistorySpanMode {
     case "5D":
       return { kind: "ms", ms: 5 * DAY_MS };
     case "1M":
-      return { kind: "ms", ms: 30 * DAY_MS };
+      return { kind: "utcMonths", months: 1 };
     case "3M":
-      return { kind: "ms", ms: 90 * DAY_MS };
+      return { kind: "utcMonths", months: 3 };
     case "6M":
-      return { kind: "ms", ms: 180 * DAY_MS };
+      return { kind: "utcMonths", months: 6 };
     case "YTD":
       return { kind: "ytd" };
     case "1Y":
-      return { kind: "ms", ms: 365 * DAY_MS };
+      return { kind: "utcYears", years: 1 };
     case "5Y":
-      return { kind: "ms", ms: 5 * 365 * DAY_MS };
+      return { kind: "utcYears", years: 5 };
     case "All":
       return { kind: "all" };
   }
@@ -71,6 +73,14 @@ export function effectiveHistoryFromMs(
   if (mode.kind === "ytd") {
     const y = new Date(to).getUTCFullYear();
     wantStart = Date.UTC(y, 0, 1);
+  } else if (mode.kind === "utcMonths") {
+    const d = new Date(to);
+    d.setUTCMonth(d.getUTCMonth() - mode.months);
+    wantStart = d.getTime();
+  } else if (mode.kind === "utcYears") {
+    const d = new Date(to);
+    d.setUTCFullYear(d.getUTCFullYear() - mode.years);
+    wantStart = d.getTime();
   } else {
     wantStart = to - mode.ms;
   }
