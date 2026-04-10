@@ -43,6 +43,36 @@ function klineRowToData(row: (string | number)[]): KLineData {
 }
 
 const BINANCE_KLINES_URL = "https://api.binance.com/api/v3/klines";
+const DAY_MS = 86400000;
+
+function minimumLookbackMs(period: Period): number {
+  const m = period.multiplier;
+  switch (period.timespan) {
+    case "minute":
+      if (m <= 1) return 7 * DAY_MS;
+      if (m <= 5) return 30 * DAY_MS;
+      if (m <= 15) return 14 * DAY_MS;
+      return 3 * 365 * DAY_MS;
+    case "hour":
+      return 2 * 365 * DAY_MS;
+    case "day":
+    case "week":
+    case "month":
+    case "year":
+      return 10 * 365 * DAY_MS;
+    default:
+      return 180 * DAY_MS;
+  }
+}
+
+function extendHistoryStartForZoom(
+  to: number,
+  startMs: number,
+  period: Period
+): number {
+  const deepStart = to - minimumLookbackMs(period);
+  return Math.min(startMs, deepStart);
+}
 
 function normalizeSymbol(ticker: string): string {
   return ticker.replace(/[^A-Za-z0-9]/g, "").toUpperCase() || "BTCUSDT";
@@ -109,7 +139,7 @@ export class BinanceDatafeed implements Datafeed {
 
   constructor(
     private readonly getHistoryRange: () => ChartHistoryRangeId = () => "1D"
-  ) {}
+  ) { }
 
   searchSymbols(search?: string): Promise<SymbolInfo[]> {
     if (!search?.trim()) return Promise.resolve([BTC_USDT]);
@@ -138,11 +168,12 @@ export class BinanceDatafeed implements Datafeed {
       from,
       this.getHistoryRange()
     );
+    const deepStartMs = extendHistoryStartForZoom(to, startMs, period);
     const endMs = Math.floor(to);
 
-    if (endMs - startMs <= 0) return [];
+    if (endMs - deepStartMs <= 0) return [];
 
-    return fetchKlinesPaged(sym, interval, startMs, endMs);
+    return fetchKlinesPaged(sym, interval, deepStartMs, endMs);
   }
 
   subscribe(
